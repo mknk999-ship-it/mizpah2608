@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>미스바 미션</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F6F2EA;
+  --paper-2:#FFFCF7;
+  --paper-3:#F0EAE0;
+  --ink:#2E2822;
+  --stone:#C4B49C;
+  --ink-dim:#8A7F73;
+  --clay:#D97757;
+  --silver:#B9C0CC;
+  --bronze:#B0764B;
+  --moss:#7A9A72;
+  --display:"Gowun Batang","Nanum Myeongjo",serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--paper);
+  background-image:
+    radial-gradient(120% 70% at 50% -8%, rgba(217,119,87,.13) 0%, rgba(246,242,234,0) 62%),
+    radial-gradient(90% 55% at 50% 112%, rgba(196,180,156,.28) 0%, rgba(246,242,234,0) 62%);
+  background-attachment:fixed;
+  color:var(--ink);
+  font-family:var(--body);
+  font-weight:300;
+  -webkit-font-smoothing:antialiased;
+  padding:34px 20px 56px;
+  display:flex;justify-content:center;
+}
+.shell{width:100%;max-width:520px}
+
+.mark{text-align:center;margin-bottom:38px}
+.mark h1{
+  font-family:var(--display);font-weight:700;font-size:27px;
+  letter-spacing:.26em;text-indent:.26em;color:var(--ink);
+}
+.mark .rule{
+  width:46px;height:1px;margin:14px auto 12px;
+  background:linear-gradient(90deg,transparent,var(--stone),transparent);
+}
+.mark p{font-size:11.5px;letter-spacing:.2em;color:var(--ink-dim)}
+.mark .mode-note{
+  margin-top:12px;font-size:10.5px;letter-spacing:.04em;color:#B85C3E;
+}
+.mark .mode-note:empty{display:none}
+
+.screen{display:none}
+.screen.on{display:block;animation:rise .5s cubic-bezier(.2,.7,.3,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.ask{
+  font-family:var(--display);font-size:21px;font-weight:400;
+  text-align:center;line-height:1.55;margin-bottom:6px;
+}
+.sub{text-align:center;font-size:12px;color:var(--ink-dim);letter-spacing:.06em;margin-bottom:26px}
+
+.names{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.name{
+  appearance:none;cursor:pointer;
+  font-family:var(--display);font-size:17px;color:var(--ink);
+  background:var(--paper-2);
+  border:1px solid rgba(46,40,34,.14);
+  border-radius:3px;
+  padding:19px 10px;
+  position:relative;
+  box-shadow:0 1px 2px rgba(46,40,34,.05);
+  transition:background .22s, border-color .22s, transform .22s, box-shadow .22s;
+}
+.name::before{
+  content:"";position:absolute;left:50%;top:11px;transform:translateX(-50%);
+  width:13px;height:5px;border-radius:50% 50% 42% 42%;
+  background:var(--stone);opacity:.28;transition:opacity .22s;
+}
+.name:hover,.name:focus-visible{background:var(--paper-3);border-color:rgba(217,119,87,.55);transform:translateY(-2px);box-shadow:0 6px 14px rgba(46,40,34,.08)}
+.name:hover::before,.name:focus-visible::before{opacity:.85}
+.name:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
+
+.ghost{
+  display:block;width:100%;margin-top:22px;cursor:pointer;
+  background:transparent;border:1px solid rgba(46,40,34,.20);border-radius:3px;
+  color:var(--stone);font-family:var(--body);font-size:13px;letter-spacing:.14em;
+  padding:15px;transition:border-color .22s,color .22s;
+}
+.ghost:hover,.ghost:focus-visible{border-color:var(--clay);color:var(--clay)}
+.ghost:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
+
+.who{text-align:center;font-family:var(--display);font-size:26px;margin-bottom:4px}
+.sofar{text-align:center;font-size:12px;color:var(--ink-dim);margin-bottom:30px;letter-spacing:.05em}
+.sofar b{font-family:var(--mono);font-weight:700;color:var(--stone);font-size:13px}
+
+.field{
+  display:flex;align-items:center;gap:12px;
+  background:var(--paper-2);border:1px solid rgba(46,40,34,.14);
+  border-radius:3px;padding:6px 20px 6px 6px;
+}
+.field input{
+  flex:1;min-width:0;background:transparent;border:0;outline:none;
+  font-family:var(--mono);font-weight:700;font-size:40px;color:var(--ink);
+  padding:16px 18px;text-align:right;
+}
+.field input::-webkit-outer-spin-button,.field input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.field input[type=number]{-moz-appearance:textfield}
+.field span{font-family:var(--display);font-size:17px;color:var(--ink-dim);flex:none}
+.field:focus-within{border-color:var(--clay)}
+
+.quick{display:flex;gap:8px;margin-top:10px}
+.quick button{
+  flex:1;cursor:pointer;background:transparent;
+  border:1px solid rgba(46,40,34,.14);border-radius:3px;
+  color:var(--ink-dim);font-family:var(--mono);font-size:13px;padding:11px;
+  transition:color .2s,border-color .2s;
+}
+.quick button:hover,.quick button:focus-visible{color:var(--clay);border-color:rgba(217,119,87,.55)}
+
+.solid{
+  display:block;width:100%;margin-top:16px;cursor:pointer;
+  background:var(--clay);border:0;border-radius:3px;color:#FFF7F3;
+  font-family:var(--body);font-weight:600;font-size:14px;letter-spacing:.1em;padding:17px;
+  transition:filter .2s;
+}
+.solid:hover{filter:brightness(1.08)}
+.solid:disabled{opacity:.4;cursor:default}
+.back{
+  display:block;margin:16px auto 0;background:none;border:0;cursor:pointer;
+  color:var(--ink-dim);font-size:12px;letter-spacing:.1em;padding:8px;
+}
+.back:hover{color:var(--stone)}
+.err{margin-top:12px;text-align:center;font-size:12px;color:#B85C3E;min-height:16px}
+
+.row{
+  display:grid;grid-template-columns:38px 1fr auto;align-items:center;
+  gap:13px;padding:16px 4px;border-bottom:1px solid rgba(46,40,34,.10);
+}
+.row.me{background:linear-gradient(90deg,rgba(217,119,87,.13),transparent 70%);border-radius:3px}
+
+.medal{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
+  font-family:var(--mono);font-weight:700;font-size:14px;
+  box-shadow:inset 0 -2px 4px rgba(0,0,0,.22), 0 1px 3px rgba(46,40,34,.16);
+}
+.m1{background:linear-gradient(150deg,#F7DE93,#C9A03F 55%,#8A6819);color:#43310A}
+.m2{background:linear-gradient(150deg,#F3F6FA,#B4BCC8 55%,#6F7887);color:#333944}
+.m3{background:linear-gradient(150deg,#EABA92,#AE7346 55%,#6B4224);color:#FFF1E4}
+.rank-n{font-family:var(--mono);font-size:14px;color:var(--ink-dim);text-align:center;width:32px}
+
+.person{min-width:0}
+.person .nm{font-family:var(--display);font-size:17px;margin-bottom:7px}
+.pile{display:flex;flex-wrap:wrap;gap:2.5px;max-width:100%}
+.stone{
+  width:8px;height:7px;border-radius:50% 50% 44% 44%;
+  background:var(--stone);opacity:.85;
+}
+.row.top .stone{background:var(--clay);opacity:.8}
+.stone.drop{animation:drop .38s cubic-bezier(.3,1.4,.5,1) both}
+@keyframes drop{from{opacity:0;transform:translateY(-9px) scale(.5)}to{opacity:.85;transform:none}}
+.empty{font-size:11.5px;color:var(--ink-dim);letter-spacing:.05em}
+
+.count{font-family:var(--mono);font-weight:700;font-size:20px;text-align:right}
+.count small{display:block;font-family:var(--body);font-weight:300;font-size:10px;color:var(--ink-dim);letter-spacing:.14em;margin-top:2px}
+
+.legend{text-align:center;font-size:11px;color:var(--ink-dim);letter-spacing:.08em;margin-top:22px}
+.toast{
+  margin-top:14px;text-align:center;font-size:12px;color:var(--moss);
+  animation:rise .4s both;
+}
+.toast button{background:none;border:0;color:var(--stone);cursor:pointer;
+  text-decoration:underline;text-underline-offset:3px;font-size:12px;font-family:var(--body);padding:4px}
+.loading{text-align:center;color:var(--ink-dim);font-size:12.5px;padding:40px 0;letter-spacing:.1em}
+
+@media (max-width:360px){
+  .names{grid-template-columns:1fr}
+  .field input{font-size:34px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <div class="mark">
+    <h1>미스바 미션</h1>
+    <div class="rule"></div>
+    <p>어떻게든 많이 읽어보는 한주</p>
+    <p id="mode-note" class="mode-note"></p>
+  </div>
+
+  <section id="s-who" class="screen on">
+    <p class="ask">당신은 누구입니까?</p>
+    <p class="sub">이름을 고르면 그 이름으로 기록됩니다</p>
+    <div class="names" id="names"></div>
+    <button class="ghost" id="go-rank">랭킹보드 보러가기</button>
+  </section>
+
+  <section id="s-add" class="screen">
+    <p class="who" id="who-name">—</p>
+    <p class="sofar" id="who-sofar"></p>
+    <p class="ask" style="font-size:17px;margin-bottom:20px">오늘 읽은 말씀 분량을 추가해주세요</p>
+    <div class="field">
+      <input id="chapters" type="number" inputmode="numeric" min="1" max="200" placeholder="0">
+      <span>장</span>
+    </div>
+    <div class="quick">
+      <button data-add="1">+1</button>
+      <button data-add="3">+3</button>
+      <button data-add="5">+5</button>
+      <button data-add="10">+10</button>
+    </div>
+    <button class="solid" id="save">기록하기</button>
+    <p class="err" id="err"></p>
+    <button class="back" id="back-who">← 다른 이름 고르기</button>
+  </section>
+
+  <section id="s-rank" class="screen">
+    <p class="ask" style="font-size:19px;margin-bottom:22px">쌓아 올린 말씀</p>
+    <div id="board"><p class="loading">돌무더기를 세는 중…</p></div>
+    <p class="legend" id="legend"></p>
+    <div id="toast"></div>
+    <button class="ghost" id="back-who-2" style="margin-top:26px">처음으로 돌아가기</button>
+  </section>
+
+</div>
+
+<script>
+const SUPA_URL = "https://puodkclwvouhuncoxphb.supabase.co";
+const SUPA_KEY = "sb_publishable_yXmT81L554_3UmSmp4erzQ_sYZxUumo";
+const H = {
+  "apikey": SUPA_KEY,
+  "Authorization": "Bearer " + SUPA_KEY,
+  "Content-Type": "application/json"
+};
+
+const NAMES = ["이명세훈","김민정","유은지","유재은","박원준","유영우"];
+const MAX_STONES = 26;
+
+let data = blank();
+let me = null;
+let lastEntry = null;
+
+function blank(){
+  const o = {};
+  NAMES.forEach(n => o[n] = {total:0, at:0});
+  return o;
+}
+function note(msg){
+  document.getElementById("mode-note").textContent = msg || "";
+}
+
+async function load(){
+  const r = await fetch(
+    SUPA_URL + "/rest/v1/mizpah_readers?select=name,total,updated_at",
+    { headers: H, cache: "no-store" }
+  );
+  if(!r.ok) throw new Error(await r.text());
+  const rows = await r.json();
+  const next = blank();
+  rows.forEach(row => {
+    if(next[row.name]) next[row.name] = {
+      total: row.total || 0,
+      at: row.updated_at ? Date.parse(row.updated_at) : 0
+    };
+  });
+  data = next;
+  note("");
+}
+async function addChapters(name, amount){
+  const r = await fetch(SUPA_URL + "/rest/v1/rpc/add_chapters", {
+    method: "POST", headers: H,
+    body: JSON.stringify({ p_name: name, p_amount: amount })
+  });
+  if(!r.ok) throw new Error(await r.text());
+}
+
+function show(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("on"));
+  document.getElementById(id).classList.add("on");
+  window.scrollTo({top:0, behavior:"instant"});
+}
+
+function buildNames(){
+  const box = document.getElementById("names");
+  box.innerHTML = "";
+  NAMES.forEach(n => {
+    const b = document.createElement("button");
+    b.className = "name"; b.textContent = n;
+    b.onclick = () => { me = n; openAdd(); };
+    box.appendChild(b);
+  });
+}
+
+async function openAdd(){
+  document.getElementById("who-name").textContent = me;
+  document.getElementById("who-sofar").textContent = "불러오는 중…";
+  document.getElementById("chapters").value = "";
+  document.getElementById("err").textContent = "";
+  show("s-add");
+  try{ await load(); }catch(e){ note("기록을 불러오지 못했습니다 · 연결을 확인해 주세요"); }
+  const t = data[me].total;
+  document.getElementById("who-sofar").innerHTML =
+    t > 0 ? "지금까지 <b>" + t + "</b>장" : "아직 쌓은 돌이 없습니다";
+  setTimeout(() => document.getElementById("chapters").focus(), 120);
+}
+
+function ranked(){
+  return NAMES.slice().sort((a,b) => {
+    const d = data[b].total - data[a].total;
+    if(d !== 0) return d;
+    return (data[a].at || Infinity) - (data[b].at || Infinity);
+  });
+}
+
+function drawBoard(animateFor){
+  const order = ranked();
+  const max = Math.max(...order.map(n => data[n].total), 1);
+  const unit = Math.max(1, Math.ceil(max / MAX_STONES));
+  const board = document.getElementById("board");
+  board.innerHTML = "";
+
+  order.forEach((n, i) => {
+    const total = data[n].total;
+    const row = document.createElement("div");
+    row.className = "row" + (i < 3 ? " top" : "") + (n === me ? " me" : "");
+
+    const badge = i < 3
+      ? '<div class="medal m' + (i+1) + '">' + (i+1) + '</div>'
+      : '<div class="rank-n">' + (i+1) + '</div>';
+
+    const count = total > 0 ? Math.max(1, Math.round(total / unit)) : 0;
+    const fresh = animateFor === n ? Math.round((lastEntry ? lastEntry.amount : 0) / unit) : 0;
+    let pile = "";
+    for(let s = 0; s < count; s++){
+      const isNew = s >= count - fresh;
+      pile += '<i class="stone' + (isNew ? " drop" : "") +
+              '" style="animation-delay:' + (isNew ? s*40 : 0) + 'ms"></i>';
+    }
+
+    row.innerHTML = badge +
+      '<div class="person"><div class="nm">' + n + '</div>' +
+      (total > 0 ? '<div class="pile">' + pile + '</div>'
+                 : '<div class="empty">첫 돌을 기다리는 중</div>') +
+      '</div><div class="count">' + total + '<small>장</small></div>';
+    board.appendChild(row);
+  });
+
+  document.getElementById("legend").textContent = "돌 하나 = " + unit + "장";
+}
+
+document.getElementById("go-rank").onclick = async () => {
+  show("s-rank");
+  document.getElementById("toast").innerHTML = "";
+  document.getElementById("board").innerHTML = '<p class="loading">돌무더기를 세는 중…</p>';
+  try{ await load(); }
+  catch(e){ note("기록을 불러오지 못했습니다 · 연결을 확인해 주세요"); }
+  drawBoard();
+};
+document.getElementById("back-who").onclick = () => show("s-who");
+document.getElementById("back-who-2").onclick = () => {
+  document.getElementById("toast").innerHTML = "";
+  show("s-who");
+};
+
+document.querySelectorAll(".quick button").forEach(b => {
+  b.onclick = () => {
+    const f = document.getElementById("chapters");
+    f.value = (parseInt(f.value || "0", 10) || 0) + parseInt(b.dataset.add, 10);
+  };
+});
+document.getElementById("chapters").addEventListener("keydown", e => {
+  if(e.key === "Enter") document.getElementById("save").click();
+});
+
+document.getElementById("save").onclick = async () => {
+  const f = document.getElementById("chapters");
+  const err = document.getElementById("err");
+  const btn = document.getElementById("save");
+  const v = parseInt(f.value, 10);
+
+  if(!v || v < 1){ err.textContent = "1장 이상의 숫자를 넣어주세요"; f.focus(); return; }
+  if(v > 200){ err.textContent = "한 번에 200장까지 기록할 수 있습니다"; f.focus(); return; }
+
+  btn.disabled = true; btn.textContent = "쌓는 중…"; err.textContent = "";
+  try{
+    await addChapters(me, v);
+    lastEntry = { name: me, amount: v };
+    await load();
+    drawBoard(me);
+    document.getElementById("toast").innerHTML =
+      '<div class="toast">' + me + ' · ' + v + '장을 쌓았습니다 &nbsp;<button id="undo">되돌리기</button></div>';
+    document.getElementById("undo").onclick = undo;
+    show("s-rank");
+  }catch(e){
+    err.textContent = "기록에 실패했습니다 · 잠시 후 다시 눌러주세요";
+  }
+  btn.disabled = false; btn.textContent = "기록하기";
+};
+
+async function undo(){
+  if(!lastEntry) return;
+  const t = document.getElementById("toast");
+  t.innerHTML = '<div class="toast">되돌리는 중…</div>';
+  try{
+    await addChapters(lastEntry.name, -lastEntry.amount);
+    lastEntry = null;
+    await load();
+    drawBoard();
+    t.innerHTML = "";
+  }catch(e){
+    t.innerHTML = '<div class="toast">되돌리지 못했습니다</div>';
+  }
+}
+
+(async () => {
+  buildNames();
+  try{ await load(); }
+  catch(e){ note("기록을 불러오지 못했습니다 · 연결을 확인해 주세요"); }
+})();
+</script>
+</body>
+</html>
