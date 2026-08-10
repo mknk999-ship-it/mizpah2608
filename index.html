@@ -143,14 +143,22 @@ body{
   gap:13px;padding:16px 4px;border-bottom:1px solid rgba(46,40,34,.10);
 }
 .row.me{background:linear-gradient(90deg,rgba(217,119,87,.13),transparent 70%);border-radius:3px}
-
-.medal{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
-  font-family:var(--mono);font-weight:700;font-size:14px;
-  box-shadow:inset 0 -2px 4px rgba(0,0,0,.22), 0 1px 3px rgba(46,40,34,.16);
+.row.shift{will-change:transform}
+.up{
+  font-family:var(--mono);font-size:10.5px;color:var(--moss);
+  margin-left:9px;letter-spacing:.02em;
+  animation:fadeout 3s forwards;
 }
-.m1{background:linear-gradient(150deg,#F7DE93,#C9A03F 55%,#8A6819);color:#43310A}
-.m2{background:linear-gradient(150deg,#F3F6FA,#B4BCC8 55%,#6F7887);color:#333944}
-.m3{background:linear-gradient(150deg,#EABA92,#AE7346 55%,#6B4224);color:#FFF1E4}
+@keyframes fadeout{0%,62%{opacity:1}100%{opacity:0}}
+
+.medal{width:32px;height:36px;display:grid;place-items:center;
+  clip-path:polygon(50% 0,100% 26%,100% 74%,50% 100%,0 74%,0 26%);
+  font-family:var(--mono);font-weight:700;font-size:13px;
+  box-shadow:inset 0 -2px 5px rgba(0,0,0,.2);
+}
+.m1{background:linear-gradient(155deg,#F7DE93,#C9A03F 52%,#8A6819);color:#43310A}
+.m2{background:linear-gradient(155deg,#F3F6FA,#B4BCC8 52%,#6F7887);color:#333944}
+.m3{background:linear-gradient(155deg,#EABA92,#AE7346 52%,#6B4224);color:#FFF1E4}
 .rank-n{font-family:var(--mono);font-size:14px;color:var(--ink-dim);text-align:center;width:32px}
 
 .person{min-width:0}
@@ -320,7 +328,7 @@ function ranked(){
   });
 }
 
-function drawBoard(animateFor){
+function drawBoard(animateFor, jump){
   const order = ranked();
   const max = Math.max(...order.map(n => data[n].total), 1);
   const unit = Math.max(1, Math.ceil(max / MAX_STONES));
@@ -331,6 +339,7 @@ function drawBoard(animateFor){
     const total = data[n].total;
     const row = document.createElement("div");
     row.className = "row" + (i < 3 ? " top" : "") + (n === me ? " me" : "");
+    row.dataset.name = n;
 
     const badge = i < 3
       ? '<div class="medal m' + (i+1) + '">' + (i+1) + '</div>'
@@ -345,8 +354,11 @@ function drawBoard(animateFor){
               '" style="animation-delay:' + (isNew ? s*40 : 0) + 'ms"></i>';
     }
 
+    const rise = (jump && jump.name === n && jump.delta > 0)
+      ? '<span class="up">&#9650; ' + jump.delta + '</span>' : "";
+
     row.innerHTML = badge +
-      '<div class="person"><div class="nm">' + n + '</div>' +
+      '<div class="person"><div class="nm">' + n + rise + '</div>' +
       (total > 0 ? '<div class="pile">' + pile + '</div>'
                  : '<div class="empty">첫 돌을 기다리는 중</div>') +
       '</div><div class="count">' + total + '<small>장</small></div>';
@@ -354,6 +366,53 @@ function drawBoard(animateFor){
   });
 
   document.getElementById("legend").textContent = "돌 하나 = " + unit + "장";
+}
+
+function rowTops(){
+  const map = {};
+  document.querySelectorAll("#board .row").forEach(r => {
+    map[r.dataset.name] = r.getBoundingClientRect().top;
+  });
+  return map;
+}
+
+function countUp(el, from, to){
+  const t0 = performance.now(), dur = 700;
+  function step(t){
+    const k = Math.min(1, (t - t0) / dur);
+    const e = 1 - Math.pow(1 - k, 3);
+    el.firstChild.nodeValue = String(Math.round(from + (to - from) * e));
+    if(k < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function reorder(jump, fromTotal){
+  const before = rowTops();
+  drawBoard(jump.name, jump);
+  const after = rowTops();
+
+  const rows = document.querySelectorAll("#board .row");
+  rows.forEach(r => {
+    const n = r.dataset.name;
+    if(before[n] === undefined) return;
+    const dy = before[n] - after[n];
+    if(!dy) return;
+    r.classList.add("shift");
+    r.style.transition = "none";
+    r.style.transform = "translateY(" + dy + "px)";
+  });
+
+  requestAnimationFrame(() => {
+    rows.forEach(r => {
+      if(!r.classList.contains("shift")) return;
+      r.style.transition = "transform .7s cubic-bezier(.22,.9,.25,1)";
+      r.style.transform = "";
+    });
+  });
+
+  const mine = document.querySelector('#board .row[data-name="' + jump.name + '"] .count');
+  if(mine) countUp(mine, fromTotal, data[jump.name].total);
 }
 
 document.getElementById("go-rank").onclick = async () => {
@@ -393,12 +452,23 @@ document.getElementById("save").onclick = async () => {
   try{
     await addChapters(me, v);
     lastEntry = { name: me, amount: v };
-    await load();
-    drawBoard(me);
-    document.getElementById("toast").innerHTML =
-      '<div class="toast">' + me + ' · ' + v + '장을 쌓았습니다 &nbsp;<button id="undo">되돌리기</button></div>';
-    document.getElementById("undo").onclick = undo;
+
+    const wasTotal = data[me].total;
+    const wasRank  = ranked().indexOf(me);
+
+    document.getElementById("toast").innerHTML = "";
     show("s-rank");
+    drawBoard();
+
+    await load();
+    const nowRank = ranked().indexOf(me);
+
+    setTimeout(() => {
+      reorder({ name: me, delta: wasRank - nowRank }, wasTotal);
+      document.getElementById("toast").innerHTML =
+        '<div class="toast">' + me + ' · ' + v + '장을 쌓았습니다 &nbsp;<button id="undo">되돌리기</button></div>';
+      document.getElementById("undo").onclick = undo;
+    }, 550);
   }catch(e){
     err.textContent = "기록에 실패했습니다 · 잠시 후 다시 눌러주세요";
   }
