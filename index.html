@@ -87,13 +87,22 @@ body{
 .name:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
 
 .ghost{
-  display:block;width:100%;margin-top:22px;cursor:pointer;
+  display:block;width:100%;margin-top:12px;cursor:pointer;
   background:transparent;border:1px solid rgba(46,40,34,.20);border-radius:3px;
   color:var(--stone);font-family:var(--body);font-size:13px;letter-spacing:.14em;
   padding:15px;transition:border-color .22s,color .22s;
 }
+.ghost.gap{margin-top:22px}
 .ghost:hover,.ghost:focus-visible{border-color:var(--clay);color:var(--clay)}
 .ghost:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
+
+.danger{
+  display:block;width:100%;margin-top:10px;cursor:pointer;
+  background:transparent;border:1px solid rgba(184,92,62,.32);border-radius:3px;
+  color:#B85C3E;font-family:var(--body);font-size:12.5px;letter-spacing:.12em;
+  padding:14px;transition:background .2s;
+}
+.danger:hover{background:rgba(184,92,62,.07)}
 
 .who{text-align:center;font-family:var(--display);font-size:26px;margin-bottom:4px}
 .sofar{text-align:center;font-size:12px;color:var(--ink-dim);margin-bottom:30px;letter-spacing:.05em}
@@ -104,27 +113,34 @@ body{
   background:var(--paper-2);border:1px solid rgba(46,40,34,.14);
   border-radius:3px;padding:6px 20px 6px 6px;
 }
-.field input{
-  flex:1;min-width:0;background:transparent;border:0;outline:none;
-  font-family:var(--mono);font-weight:700;font-size:40px;color:var(--ink);
-  padding:16px 18px;text-align:right;
+.amount{
+  flex:1;min-width:0;
+  font-family:var(--mono);font-weight:700;font-size:44px;color:var(--ink);
+  padding:14px 18px;text-align:right;line-height:1.1;
+  transition:color .2s,transform .18s;
 }
-.field input::-webkit-outer-spin-button,.field input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-.field input[type=number]{-moz-appearance:textfield}
+.amount.zero{color:rgba(46,40,34,.2)}
+.amount.bump{transform:scale(1.06)}
 .field span{font-family:var(--display);font-size:17px;color:var(--ink-dim);flex:none}
-.field:focus-within{border-color:var(--clay)}
 
-.quick{display:flex;gap:8px;margin-top:10px}
+.quick{display:flex;gap:7px;margin-top:10px}
 .quick button{
   flex:1;cursor:pointer;background:transparent;
   border:1px solid rgba(46,40,34,.14);border-radius:3px;
-  color:var(--ink-dim);font-family:var(--mono);font-size:13px;padding:11px;
-  transition:color .2s,border-color .2s;
+  color:var(--ink-dim);font-family:var(--mono);font-size:13px;padding:15px 0;
+  transition:color .2s,border-color .2s,background .15s;
 }
+.quick button:active{background:var(--paper-3)}
+.quick button.minus{color:#B85C3E;border-color:rgba(184,92,62,.28)}
 .quick button:hover,.quick button:focus-visible{color:var(--clay);border-color:rgba(217,119,87,.55)}
+.clear{
+  display:block;margin:12px auto 0;background:none;border:0;cursor:pointer;
+  color:var(--ink-dim);font-size:11.5px;letter-spacing:.1em;padding:6px 10px;
+}
+.clear:hover{color:var(--stone)}
 
 .solid{
-  display:block;width:100%;margin-top:16px;cursor:pointer;
+  display:block;width:100%;margin-top:14px;cursor:pointer;
   background:var(--clay);border:0;border-radius:3px;color:#FFF7F3;
   font-family:var(--body);font-weight:600;font-size:14px;letter-spacing:.1em;padding:17px;
   transition:filter .2s;
@@ -161,6 +177,17 @@ body{
 .m3{background:linear-gradient(155deg,#EABA92,#AE7346 52%,#6B4224);color:#FFF1E4}
 .rank-n{font-family:var(--mono);font-size:14px;color:var(--ink-dim);text-align:center;width:32px}
 
+.badges{display:inline-flex;gap:3.5px;margin-left:7px;vertical-align:middle}
+.bdg{
+  width:16px;height:16px;border-radius:50%;
+  display:inline-grid;place-items:center;
+  font-family:var(--mono);font-weight:700;font-size:9px;
+  box-shadow:inset 0 -1px 2px rgba(0,0,0,.24);
+}
+.b1{background:linear-gradient(155deg,#F7DE93,#C9A03F 52%,#8A6819);color:#43310A}
+.b2{background:linear-gradient(155deg,#F3F6FA,#B4BCC8 52%,#6F7887);color:#333944}
+.b3{background:linear-gradient(155deg,#EABA92,#AE7346 52%,#6B4224);color:#FFF1E4}
+
 .person{min-width:0}
 .person .nm{font-family:var(--display);font-size:17px;margin-bottom:7px}
 .pile{display:flex;flex-wrap:wrap;gap:2.5px;max-width:100%}
@@ -185,9 +212,54 @@ body{
   text-decoration:underline;text-underline-offset:3px;font-size:12px;font-family:var(--body);padding:4px}
 .loading{text-align:center;color:var(--ink-dim);font-size:12.5px;padding:40px 0;letter-spacing:.1em}
 
+.yearhead{
+  font-family:var(--display);font-size:15px;letter-spacing:.12em;color:var(--ink-dim);
+  margin:22px 0 4px;padding-bottom:9px;border-bottom:1px solid rgba(46,40,34,.14);
+}
+.weeklink{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;
+  background:transparent;border:0;border-bottom:1px solid rgba(46,40,34,.08);
+  padding:17px 4px;cursor:pointer;text-align:left;
+  font-family:var(--display);font-size:16px;color:var(--ink);
+  transition:color .2s;
+}
+.weeklink:hover{color:var(--clay)}
+.weeklink small{font-family:var(--body);font-weight:300;font-size:11.5px;color:var(--ink-dim);
+  display:flex;align-items:center;flex:none}
+
+.veil{
+  position:fixed;inset:0;background:rgba(46,40,34,.62);
+  display:none;align-items:center;justify-content:center;padding:22px;z-index:50;
+}
+.veil.on{display:flex}
+.card{
+  background:var(--paper-2);border-radius:5px;padding:26px 22px;
+  width:100%;max-width:300px;box-shadow:0 18px 44px rgba(46,40,34,.3);
+  animation:rise .32s both;
+}
+.card h3{font-family:var(--display);font-size:19px;font-weight:400;text-align:center;margin-bottom:8px}
+.card .cap{text-align:center;font-size:11.5px;color:var(--ink-dim);line-height:1.8}
+.card .cap b{font-family:var(--display);font-weight:400;color:var(--clay);font-size:13px}
+.dots{display:flex;justify-content:center;gap:13px;margin:20px 0 22px}
+.dot{width:9px;height:9px;border-radius:50%;background:rgba(46,40,34,.16);transition:background .15s}
+.dot.fill{background:var(--clay)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.pad button{
+  cursor:pointer;background:var(--paper);border:1px solid rgba(46,40,34,.12);
+  border-radius:3px;padding:16px 0;font-family:var(--mono);font-size:18px;color:var(--ink);
+}
+.pad button:active{background:var(--paper-3)}
+.pad button.txt{
+  font-family:var(--body);font-size:11.5px;color:var(--ink-dim);
+  border-color:transparent;background:transparent;letter-spacing:.06em;
+}
+.shakes{animation:shake .4s}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+
 @media (max-width:360px){
   .names{grid-template-columns:1fr}
-  .field input{font-size:34px}
+  .amount{font-size:38px}
+  .quick button{font-size:12px;padding:14px 0}
 }
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.01ms!important;transition-duration:.01ms!important}
@@ -208,23 +280,26 @@ body{
     <p class="ask">당신은 누구입니까?</p>
     <p class="sub">이름을 고르면 그 이름으로 기록됩니다</p>
     <div class="names" id="names"></div>
-    <button class="ghost" id="go-rank">랭킹보드 보러가기</button>
+    <button class="ghost gap" id="go-rank">랭킹보드 보러가기</button>
+    <button class="ghost" id="go-arch-1">지난 기록 보기</button>
   </section>
 
   <section id="s-add" class="screen">
     <p class="who" id="who-name">—</p>
     <p class="sofar" id="who-sofar"></p>
-    <p class="ask" style="font-size:17px;margin-bottom:20px">오늘 읽은 말씀 분량을 추가해주세요</p>
+    <p class="ask" style="font-size:17px;margin-bottom:20px">오늘 읽은 말씀 분량을 더해주세요</p>
     <div class="field">
-      <input id="chapters" type="number" inputmode="numeric" min="1" max="200" placeholder="0">
+      <div class="amount zero" id="amount">0</div>
       <span>장</span>
     </div>
     <div class="quick">
+      <button class="minus" data-add="-1">−1</button>
       <button data-add="1">+1</button>
       <button data-add="3">+3</button>
       <button data-add="5">+5</button>
       <button data-add="10">+10</button>
     </div>
+    <button class="clear" id="clear-amt">지우기</button>
     <button class="solid" id="save">기록하기</button>
     <p class="err" id="err"></p>
     <button class="back" id="back-who">← 다른 이름 고르기</button>
@@ -235,9 +310,44 @@ body{
     <div id="board"><p class="loading">돌무더기를 세는 중…</p></div>
     <p class="legend" id="legend"></p>
     <div id="toast"></div>
-    <button class="ghost" id="back-who-2" style="margin-top:26px">처음으로 돌아가기</button>
+    <button class="ghost gap" id="back-who-2">처음으로 돌아가기</button>
+    <button class="ghost" id="go-arch-2">지난 기록 보기</button>
+    <button class="danger" id="reset-btn">이번 주 마감하고 초기화</button>
   </section>
 
+  <section id="s-archs" class="screen">
+    <p class="ask" style="font-size:19px">지난 기록</p>
+    <p class="sub">마감된 주간의 돌무더기입니다</p>
+    <div id="arch-list"><p class="loading">기록을 찾는 중…</p></div>
+    <button class="ghost gap" id="arch-back">돌아가기</button>
+  </section>
+
+  <section id="s-arch-one" class="screen">
+    <p class="ask" id="arch-title" style="font-size:19px;margin-bottom:6px">—</p>
+    <p class="sub" id="arch-sub"></p>
+    <div id="arch-board"></div>
+    <p class="legend" id="arch-legend"></p>
+    <button class="ghost gap" id="arch-one-back">목록으로</button>
+  </section>
+
+</div>
+
+<div class="veil" id="veil-pin">
+  <div class="card" id="pin-card">
+    <h3>관리자 확인</h3>
+    <p class="cap">초기화 비밀번호를 눌러주세요</p>
+    <div class="dots" id="dots"></div>
+    <div class="pad" id="pad"></div>
+  </div>
+</div>
+
+<div class="veil" id="veil-ok">
+  <div class="card">
+    <h3>정말 초기화할까요?</h3>
+    <p class="cap">현재 기록은 <b id="ok-week">—</b>으로 저장되고<br>1·2·3위에게 금·은·동메달이 수여됩니다<br>랭킹은 0장부터 다시 시작합니다</p>
+    <button class="solid" id="ok-go">마감하고 초기화</button>
+    <button class="back" id="ok-cancel">취소</button>
+  </div>
 </div>
 
 <script>
@@ -251,10 +361,17 @@ const H = {
 
 const NAMES = ["이명세훈","김민정","유은지","유재은","박원준","유영우"];
 const MAX_STONES = 26;
+const MAX_ONCE = 200;
 
 let data = blank();
 let me = null;
+let amount = 0;
 let lastEntry = null;
+let archives = [];
+let medals = {};
+let archFrom = "s-who";
+let pin = "";
+let okPin = "";
 
 function blank(){
   const o = {};
@@ -263,6 +380,28 @@ function blank(){
 }
 function note(msg){
   document.getElementById("mode-note").textContent = msg || "";
+}
+
+function weekInfo(d){
+  const now = d || new Date();
+  const sun = new Date(now);
+  sun.setDate(now.getDate() - now.getDay());
+  const y = sun.getFullYear(), m = sun.getMonth() + 1;
+  const w = Math.floor((sun.getDate() - 1) / 7) + 1;
+  return {
+    key: y + "-" + String(m).padStart(2,"0") + "-W" + w,
+    year: y, month: m, week: w,
+    label: m + "월 " + w + "주 기록"
+  };
+}
+
+async function rpc(fn, body){
+  const r = await fetch(SUPA_URL + "/rest/v1/rpc/" + fn, {
+    method: "POST", headers: H, body: JSON.stringify(body)
+  });
+  if(!r.ok) throw new Error(await r.text());
+  const t = await r.text();
+  return t ? JSON.parse(t) : null;
 }
 
 async function load(){
@@ -282,12 +421,63 @@ async function load(){
   data = next;
   note("");
 }
-async function addChapters(name, amount){
-  const r = await fetch(SUPA_URL + "/rest/v1/rpc/add_chapters", {
-    method: "POST", headers: H,
-    body: JSON.stringify({ p_name: name, p_amount: amount })
-  });
+async function addChapters(name, amt){
+  await rpc("add_chapters", { p_name: name, p_amount: amt });
+}
+async function loadArchives(){
+  const r = await fetch(
+    SUPA_URL + "/rest/v1/mizpah_archives?select=week_key,year,month,week,label,records&order=week_key.desc",
+    { headers: H, cache: "no-store" }
+  );
   if(!r.ok) throw new Error(await r.text());
+  archives = await r.json();
+  tallyMedals();
+}
+
+/* ── 순위 · 메달 (동점은 공동 순위) ─────────── */
+
+function rankList(records){
+  const list = (records || []).slice().sort((a,b) => (b.total||0) - (a.total||0));
+  let rank = 0, prev = null;
+  return list.map((p, i) => {
+    const t = p.total || 0;
+    if(prev === null || t !== prev){ rank = i + 1; prev = t; }
+    return { name: p.name, total: t, rank: rank };
+  });
+}
+function winners(records){
+  return rankList(records).filter(p => p.rank === 1 && p.total > 0);
+}
+function tallyMedals(){
+  const t = {};
+  NAMES.forEach(n => t[n] = {g:0, s:0, b:0});
+  const keys = ["g","s","b"];
+  archives.forEach(a => {
+    rankList(a.records).forEach(p => {
+      if(p.total > 0 && p.rank <= 3 && t[p.name]) t[p.name][keys[p.rank - 1]]++;
+    });
+  });
+  medals = t;
+}
+function badgeHTML(name){
+  const m = medals[name];
+  if(!m || (!m.g && !m.s && !m.b)) return "";
+  let h = '<span class="badges">';
+  if(m.g) h += '<i class="bdg b1">' + m.g + '</i>';
+  if(m.s) h += '<i class="bdg b2">' + m.s + '</i>';
+  if(m.b) h += '<i class="bdg b3">' + m.b + '</i>';
+  return h + '</span>';
+}
+function liveRanks(){
+  const sorted = NAMES.slice().sort((a,b) => data[b].total - data[a].total);
+  const map = {};
+  let rank = 0, prev = null;
+  sorted.forEach((n, i) => {
+    const t = data[n].total;
+    if(prev === null || t !== prev){ rank = i + 1; prev = t; }
+    map[n] = rank;
+  });
+  return map;
 }
 
 function show(id){
@@ -301,23 +491,35 @@ function buildNames(){
   box.innerHTML = "";
   NAMES.forEach(n => {
     const b = document.createElement("button");
-    b.className = "name"; b.textContent = n;
+    b.className = "name";
+    b.innerHTML = n + badgeHTML(n);
     b.onclick = () => { me = n; openAdd(); };
     box.appendChild(b);
   });
 }
 
+/* ── 터치 입력 ────────────────────────────── */
+
+function setAmount(v){
+  amount = Math.max(0, Math.min(MAX_ONCE, v));
+  const el = document.getElementById("amount");
+  el.textContent = amount;
+  el.classList.toggle("zero", amount === 0);
+  el.classList.add("bump");
+  setTimeout(() => el.classList.remove("bump"), 180);
+  document.getElementById("save").disabled = amount < 1;
+}
+
 async function openAdd(){
   document.getElementById("who-name").textContent = me;
   document.getElementById("who-sofar").textContent = "불러오는 중…";
-  document.getElementById("chapters").value = "";
   document.getElementById("err").textContent = "";
+  setAmount(0);
   show("s-add");
   try{ await load(); }catch(e){ note("기록을 불러오지 못했습니다 · 연결을 확인해 주세요"); }
   const t = data[me].total;
   document.getElementById("who-sofar").innerHTML =
     t > 0 ? "지금까지 <b>" + t + "</b>장" : "아직 쌓은 돌이 없습니다";
-  setTimeout(() => document.getElementById("chapters").focus(), 120);
 }
 
 function ranked(){
@@ -330,20 +532,23 @@ function ranked(){
 
 function drawBoard(animateFor, jump){
   const order = ranked();
+  const ranks = liveRanks();
   const max = Math.max(...order.map(n => data[n].total), 1);
   const unit = Math.max(1, Math.ceil(max / MAX_STONES));
   const board = document.getElementById("board");
   board.innerHTML = "";
 
-  order.forEach((n, i) => {
+  order.forEach(n => {
     const total = data[n].total;
+    const rk = ranks[n];
+    const isTop = rk <= 3 && total > 0;
     const row = document.createElement("div");
-    row.className = "row" + (i < 3 ? " top" : "") + (n === me ? " me" : "");
+    row.className = "row" + (isTop ? " top" : "") + (n === me ? " me" : "");
     row.dataset.name = n;
 
-    const badge = i < 3
-      ? '<div class="medal m' + (i+1) + '">' + (i+1) + '</div>'
-      : '<div class="rank-n">' + (i+1) + '</div>';
+    const badge = isTop
+      ? '<div class="medal m' + rk + '">' + rk + '</div>'
+      : '<div class="rank-n">' + rk + '</div>';
 
     const count = total > 0 ? Math.max(1, Math.round(total / unit)) : 0;
     const fresh = animateFor === n ? Math.round((lastEntry ? lastEntry.amount : 0) / unit) : 0;
@@ -358,7 +563,7 @@ function drawBoard(animateFor, jump){
       ? '<span class="up">&#9650; ' + jump.delta + '</span>' : "";
 
     row.innerHTML = badge +
-      '<div class="person"><div class="nm">' + n + rise + '</div>' +
+      '<div class="person"><div class="nm">' + n + badgeHTML(n) + rise + '</div>' +
       (total > 0 ? '<div class="pile">' + pile + '</div>'
                  : '<div class="empty">첫 돌을 기다리는 중</div>') +
       '</div><div class="count">' + total + '<small>장</small></div>';
@@ -415,6 +620,164 @@ function reorder(jump, fromTotal){
   if(mine) countUp(mine, fromTotal, data[jump.name].total);
 }
 
+/* ── 지난 기록 ───────────────────────────── */
+
+async function openArchives(from){
+  archFrom = from;
+  show("s-archs");
+  const box = document.getElementById("arch-list");
+  box.innerHTML = '<p class="loading">기록을 찾는 중…</p>';
+  try{ await loadArchives(); }
+  catch(e){ box.innerHTML = '<p class="loading">기록을 불러오지 못했습니다</p>'; return; }
+
+  buildNames();
+
+  if(!archives.length){
+    box.innerHTML = '<p class="loading">아직 마감된 주가 없습니다</p>';
+    return;
+  }
+
+  const byYear = {};
+  archives.forEach(a => { (byYear[a.year] = byYear[a.year] || []).push(a); });
+
+  box.innerHTML = "";
+  Object.keys(byYear).sort().reverse().forEach(y => {
+    const h = document.createElement("div");
+    h.className = "yearhead";
+    h.textContent = String(y).slice(2) + "년";
+    box.appendChild(h);
+
+    byYear[y].forEach(a => {
+      const win = winners(a.records);
+      const b = document.createElement("button");
+      b.className = "weeklink";
+      b.innerHTML = "<span>" + a.label + "</span><small>" +
+        (win.length
+          ? '<i class="bdg b1" style="margin-right:5px">1</i>' + win.map(p => p.name).join(" · ")
+          : "기록 없음") +
+        "</small>";
+      b.onclick = () => openArchive(a.week_key);
+      box.appendChild(b);
+    });
+  });
+}
+
+function openArchive(key){
+  const a = archives.find(x => x.week_key === key);
+  if(!a) return;
+  document.getElementById("arch-title").textContent = a.label;
+  const win = winners(a.records);
+  document.getElementById("arch-sub").textContent =
+    win.length ? "금메달 · " + win.map(p => p.name).join(" · ")
+               : "이 주에는 쌓인 돌이 없습니다";
+  drawArchive(a.records || []);
+  show("s-arch-one");
+}
+
+function drawArchive(records){
+  const list = rankList(records);
+  const max = Math.max(...list.map(x => x.total), 1);
+  const unit = Math.max(1, Math.ceil(max / MAX_STONES));
+  const board = document.getElementById("arch-board");
+  board.innerHTML = "";
+
+  list.forEach(p => {
+    const isTop = p.rank <= 3 && p.total > 0;
+    const row = document.createElement("div");
+    row.className = "row" + (isTop ? " top" : "");
+
+    const badge = isTop
+      ? '<div class="medal m' + p.rank + '">' + p.rank + '</div>'
+      : '<div class="rank-n">' + p.rank + '</div>';
+
+    const count = p.total > 0 ? Math.max(1, Math.round(p.total / unit)) : 0;
+    let pile = "";
+    for(let s = 0; s < count; s++) pile += '<i class="stone"></i>';
+
+    row.innerHTML = badge +
+      '<div class="person"><div class="nm">' + p.name + '</div>' +
+      (p.total > 0 ? '<div class="pile">' + pile + '</div>'
+                   : '<div class="empty">쌓은 돌이 없습니다</div>') +
+      '</div><div class="count">' + p.total + '<small>장</small></div>';
+    board.appendChild(row);
+  });
+
+  document.getElementById("arch-legend").textContent = "돌 하나 = " + unit + "장";
+}
+
+/* ── 비밀번호 패드 & 초기화 ───────────────── */
+
+function drawDots(){
+  document.getElementById("dots").innerHTML =
+    [0,1,2,3].map(i => '<i class="dot' + (i < pin.length ? " fill" : "") + '"></i>').join("");
+}
+function buildPad(){
+  const pad = document.getElementById("pad");
+  pad.innerHTML = "";
+  ["1","2","3","4","5","6","7","8","9","취소","0","←"].forEach(k => {
+    const b = document.createElement("button");
+    b.textContent = k;
+    if(k === "취소" || k === "←") b.className = "txt";
+    b.onclick = () => {
+      if(k === "취소"){ closePin(); return; }
+      if(k === "←"){ pin = pin.slice(0,-1); drawDots(); return; }
+      if(pin.length >= 4) return;
+      pin += k; drawDots();
+      if(pin.length === 4) setTimeout(verifyPin, 200);
+    };
+    pad.appendChild(b);
+  });
+}
+function openPin(){
+  pin = ""; drawDots();
+  document.getElementById("veil-pin").classList.add("on");
+}
+function closePin(){
+  pin = "";
+  document.getElementById("veil-pin").classList.remove("on");
+}
+async function verifyPin(){
+  let ok = false;
+  try{ ok = await rpc("mizpah_check_pin", { p_pin: pin }); }catch(e){ ok = false; }
+  if(ok){
+    okPin = pin;
+    closePin();
+    const w = weekInfo();
+    document.getElementById("ok-week").textContent = "<" + w.label + ">";
+    document.getElementById("veil-ok").classList.add("on");
+  }else{
+    const card = document.getElementById("pin-card");
+    card.classList.add("shakes");
+    setTimeout(() => card.classList.remove("shakes"), 420);
+    pin = ""; drawDots();
+  }
+}
+async function doReset(){
+  const btn = document.getElementById("ok-go");
+  const toast = document.getElementById("toast");
+  const w = weekInfo();
+  btn.disabled = true; btn.textContent = "저장하는 중…";
+  try{
+    await rpc("mizpah_archive_reset", {
+      p_pin: okPin, p_week_key: w.key, p_year: w.year,
+      p_month: w.month, p_week: w.week, p_label: w.label
+    });
+    okPin = ""; lastEntry = null;
+    document.getElementById("veil-ok").classList.remove("on");
+    await load();
+    try{ await loadArchives(); }catch(e){}
+    buildNames();
+    drawBoard();
+    toast.innerHTML = '<div class="toast">&lt;' + w.label + '&gt;으로 저장하고 메달을 수여했습니다</div>';
+  }catch(e){
+    document.getElementById("veil-ok").classList.remove("on");
+    toast.innerHTML = '<div class="toast" style="color:#B85C3E">초기화에 실패했습니다</div>';
+  }
+  btn.disabled = false; btn.textContent = "마감하고 초기화";
+}
+
+/* ── 화면 이동 ────────────────────────────── */
+
 document.getElementById("go-rank").onclick = async () => {
   show("s-rank");
   document.getElementById("toast").innerHTML = "";
@@ -428,25 +791,32 @@ document.getElementById("back-who-2").onclick = () => {
   document.getElementById("toast").innerHTML = "";
   show("s-who");
 };
+document.getElementById("go-arch-1").onclick = () => openArchives("s-who");
+document.getElementById("go-arch-2").onclick = () => openArchives("s-rank");
+document.getElementById("arch-back").onclick = () => show(archFrom);
+document.getElementById("arch-one-back").onclick = () => show("s-archs");
+
+document.getElementById("reset-btn").onclick = openPin;
+document.getElementById("ok-cancel").onclick = () => {
+  okPin = "";
+  document.getElementById("veil-ok").classList.remove("on");
+};
+document.getElementById("ok-go").onclick = doReset;
+document.getElementById("veil-pin").onclick = (e) => {
+  if(e.target.id === "veil-pin") closePin();
+};
 
 document.querySelectorAll(".quick button").forEach(b => {
-  b.onclick = () => {
-    const f = document.getElementById("chapters");
-    f.value = (parseInt(f.value || "0", 10) || 0) + parseInt(b.dataset.add, 10);
-  };
+  b.onclick = () => setAmount(amount + parseInt(b.dataset.add, 10));
 });
-document.getElementById("chapters").addEventListener("keydown", e => {
-  if(e.key === "Enter") document.getElementById("save").click();
-});
+document.getElementById("clear-amt").onclick = () => setAmount(0);
 
 document.getElementById("save").onclick = async () => {
-  const f = document.getElementById("chapters");
   const err = document.getElementById("err");
   const btn = document.getElementById("save");
-  const v = parseInt(f.value, 10);
+  const v = amount;
 
-  if(!v || v < 1){ err.textContent = "1장 이상의 숫자를 넣어주세요"; f.focus(); return; }
-  if(v > 200){ err.textContent = "한 번에 200장까지 기록할 수 있습니다"; f.focus(); return; }
+  if(v < 1){ err.textContent = "버튼을 눌러 1장 이상 더해주세요"; return; }
 
   btn.disabled = true; btn.textContent = "쌓는 중…"; err.textContent = "";
   try{
@@ -469,6 +839,7 @@ document.getElementById("save").onclick = async () => {
         '<div class="toast">' + me + ' · ' + v + '장을 쌓았습니다 &nbsp;<button id="undo">되돌리기</button></div>';
       document.getElementById("undo").onclick = undo;
     }, 550);
+    setAmount(0);
   }catch(e){
     err.textContent = "기록에 실패했습니다 · 잠시 후 다시 눌러주세요";
   }
@@ -492,8 +863,12 @@ async function undo(){
 
 (async () => {
   buildNames();
+  buildPad();
+  setAmount(0);
   try{ await load(); }
   catch(e){ note("기록을 불러오지 못했습니다 · 연결을 확인해 주세요"); }
+  try{ await loadArchives(); buildNames(); }
+  catch(e){}
 })();
 </script>
 </body>
