@@ -85,6 +85,8 @@ body{
 .name:hover,.name:focus-visible{background:var(--paper-3);border-color:rgba(217,119,87,.55);transform:translateY(-2px);box-shadow:0 6px 14px rgba(46,40,34,.08)}
 .name:hover::before,.name:focus-visible::before{opacity:.85}
 .name:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
+.name{display:flex;flex-direction:column;align-items:center;gap:9px;padding:20px 10px 15px}
+.name .badges{margin-left:0;flex-wrap:wrap;justify-content:center;min-height:16px}
 
 .ghost{
   display:block;width:100%;margin-top:12px;cursor:pointer;
@@ -177,16 +179,17 @@ body{
 .m3{background:linear-gradient(155deg,#EABA92,#AE7346 52%,#6B4224);color:#FFF1E4}
 .rank-n{font-family:var(--mono);font-size:14px;color:var(--ink-dim);text-align:center;width:32px}
 
-.badges{display:inline-flex;gap:3.5px;margin-left:7px;vertical-align:middle}
-.bdg{
-  width:16px;height:16px;border-radius:50%;
-  display:inline-grid;place-items:center;
-  font-family:var(--mono);font-weight:700;font-size:9px;
-  box-shadow:inset 0 -1px 2px rgba(0,0,0,.24);
-}
-.b1{background:linear-gradient(155deg,#F7DE93,#C9A03F 52%,#8A6819);color:#43310A}
-.b2{background:linear-gradient(155deg,#F3F6FA,#B4BCC8 52%,#6F7887);color:#333944}
-.b3{background:linear-gradient(155deg,#EABA92,#AE7346 52%,#6B4224);color:#FFF1E4}
+.badges{display:inline-flex;align-items:flex-start;gap:4px;margin-left:7px;vertical-align:-3px}
+.bdg{position:relative;display:inline-block;width:12px;height:16px;flex:none}
+.bdg::before{content:"";position:absolute;left:3px;top:8px;width:6px;height:7px;
+  background:var(--mb);opacity:.6;
+  clip-path:polygon(0 0,100% 0,100% 100%,50% 66%,0 100%);}
+.bdg::after{content:"";position:absolute;left:0;top:0;width:12px;height:12px;border-radius:50%;
+  background:linear-gradient(155deg,var(--ma),var(--mb) 52%,var(--mc));
+  box-shadow:inset 0 -1px 2px rgba(0,0,0,.25);}
+.b1{--ma:#F7DE93;--mb:#C9A03F;--mc:#8A6819}
+.b2{--ma:#F3F6FA;--mb:#B4BCC8;--mc:#6F7887}
+.b3{--ma:#EABA92;--mb:#AE7346;--mc:#6B4224}
 
 .person{min-width:0}
 .person .nm{font-family:var(--display);font-size:17px;margin-bottom:7px}
@@ -461,12 +464,15 @@ function tallyMedals(){
 }
 function badgeHTML(name){
   const m = medals[name];
-  if(!m || (!m.g && !m.s && !m.b)) return "";
-  let h = '<span class="badges">';
-  if(m.g) h += '<i class="bdg b1">' + m.g + '</i>';
-  if(m.s) h += '<i class="bdg b2">' + m.s + '</i>';
-  if(m.b) h += '<i class="bdg b3">' + m.b + '</i>';
-  return h + '</span>';
+  if(!m) return "";
+  let h = "";
+  [["b1",m.g],["b2",m.s],["b3",m.b]].forEach(([cls,n]) => {
+    for(let i = 0; i < n; i++) h += '<i class="bdg ' + cls + '"></i>';
+  });
+  return h ? '<span class="badges">' + h + '</span>' : "";
+}
+function anyMedals(){
+  return NAMES.some(n => medals[n] && (medals[n].g || medals[n].s || medals[n].b));
 }
 function liveRanks(){
   const sorted = NAMES.slice().sort((a,b) => data[b].total - data[a].total);
@@ -489,10 +495,12 @@ function show(id){
 function buildNames(){
   const box = document.getElementById("names");
   box.innerHTML = "";
+  const showRow = anyMedals();
   NAMES.forEach(n => {
     const b = document.createElement("button");
     b.className = "name";
-    b.innerHTML = n + badgeHTML(n);
+    b.innerHTML = '<span>' + n + '</span>' +
+      (showRow ? (badgeHTML(n) || '<span class="badges"></span>') : "");
     b.onclick = () => { me = n; openAdd(); };
     box.appendChild(b);
   });
@@ -653,7 +661,7 @@ async function openArchives(from){
       b.className = "weeklink";
       b.innerHTML = "<span>" + a.label + "</span><small>" +
         (win.length
-          ? '<i class="bdg b1" style="margin-right:5px">1</i>' + win.map(p => p.name).join(" · ")
+          ? '<i class="bdg b1" style="margin-right:6px"></i>' + win.map(p => p.name).join(" · ")
           : "기록 없음") +
         "</small>";
       b.onclick = () => openArchive(a.week_key);
