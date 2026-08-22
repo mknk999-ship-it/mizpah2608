@@ -85,8 +85,10 @@ body{
 .name:hover,.name:focus-visible{background:var(--paper-3);border-color:rgba(217,119,87,.55);transform:translateY(-2px);box-shadow:0 6px 14px rgba(46,40,34,.08)}
 .name:hover::before,.name:focus-visible::before{opacity:.85}
 .name:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
-.name{display:flex;flex-direction:column;align-items:center;gap:9px;padding:20px 10px 15px}
+.name{display:flex;flex-direction:column;align-items:center;gap:7px;padding:20px 10px 15px}
 .name .badges{margin-left:0;flex-wrap:wrap;justify-content:center;min-height:16px}
+.name .total{font-family:var(--mono);font-weight:400;font-size:11.5px;color:var(--ink-dim);letter-spacing:.04em}
+.name .total b{font-weight:700;color:var(--ink);font-size:13px}
 
 .ghost{
   display:block;width:100%;margin-top:12px;cursor:pointer;
@@ -423,6 +425,7 @@ async function load(){
   });
   data = next;
   note("");
+  buildNames();
 }
 async function addChapters(name, amt){
   await rpc("add_chapters", { p_name: name, p_amount: amt });
@@ -486,6 +489,17 @@ function liveRanks(){
   return map;
 }
 
+/* ── 누적 장수 (지난 주 합계 + 이번 주) ───────── */
+
+function cumTotal(n){
+  let t = 0;
+  archives.forEach(a => {
+    (a.records || []).forEach(p => { if(p.name === n) t += (p.total || 0); });
+  });
+  t += data[n] ? data[n].total : 0;
+  return t;
+}
+
 function show(id){
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("on"));
   document.getElementById(id).classList.add("on");
@@ -500,6 +514,7 @@ function buildNames(){
     const b = document.createElement("button");
     b.className = "name";
     b.innerHTML = '<span>' + n + '</span>' +
+      '<span class="total">누적 <b>' + cumTotal(n) + '</b>장</span>' +
       (showRow ? (badgeHTML(n) || '<span class="badges"></span>') : "");
     b.onclick = () => { me = n; openAdd(); };
     box.appendChild(b);
@@ -527,7 +542,8 @@ async function openAdd(){
   try{ await load(); }catch(e){ note("기록을 불러오지 못했습니다 · 연결을 확인해 주세요"); }
   const t = data[me].total;
   document.getElementById("who-sofar").innerHTML =
-    t > 0 ? "지금까지 <b>" + t + "</b>장" : "아직 쌓은 돌이 없습니다";
+    t > 0 ? "이번 주 <b>" + t + "</b>장 · 누적 <b>" + cumTotal(me) + "</b>장"
+          : "아직 쌓은 돌이 없습니다 · 누적 <b>" + cumTotal(me) + "</b>장";
 }
 
 function ranked(){
@@ -628,7 +644,7 @@ function reorder(jump, fromTotal){
   if(mine) countUp(mine, fromTotal, data[jump.name].total);
 }
 
-/* ── 지난 기록 ───────────────────────────── */
+/* ── 지난 기록 (마감된 모든 주를 최신순으로) ───── */
 
 async function openArchives(from){
   archFrom = from;
@@ -645,6 +661,7 @@ async function openArchives(from){
     return;
   }
 
+  // 연도별로 묶고, 각 연도 안에서는 week_key 내림차순(최신 주가 위)
   const byYear = {};
   archives.forEach(a => { (byYear[a.year] = byYear[a.year] || []).push(a); });
 
@@ -655,25 +672,27 @@ async function openArchives(from){
     h.textContent = String(y).slice(2) + "년";
     box.appendChild(h);
 
-    byYear[y].forEach(a => {
-      const win = winners(a.records);
-      const b = document.createElement("button");
-      b.className = "weeklink";
-      b.innerHTML = "<span>" + a.label + "</span><small>" +
-        (win.length
-          ? '<i class="bdg b1" style="margin-right:6px"></i>' + win.map(p => p.name).join(" · ")
-          : "기록 없음") +
-        "</small>";
-      b.onclick = () => openArchive(a.week_key);
-      box.appendChild(b);
-    });
+    byYear[y]
+      .sort((a,b) => (a.week_key < b.week_key ? 1 : -1))
+      .forEach(a => {
+        const win = winners(a.records);
+        const b = document.createElement("button");
+        b.className = "weeklink";
+        b.innerHTML = "<span>" + a.month + "월 " + a.week + "주</span><small>" +
+          (win.length
+            ? '<i class="bdg b1" style="margin-right:6px"></i>' + win.map(p => p.name).join(" · ")
+            : "기록 없음") +
+          "</small>";
+        b.onclick = () => openArchive(a.week_key);
+        box.appendChild(b);
+      });
   });
 }
 
 function openArchive(key){
   const a = archives.find(x => x.week_key === key);
   if(!a) return;
-  document.getElementById("arch-title").textContent = a.label;
+  document.getElementById("arch-title").textContent = a.month + "월 " + a.week + "주 기록";
   const win = winners(a.records);
   document.getElementById("arch-sub").textContent =
     win.length ? "금메달 · " + win.map(p => p.name).join(" · ")
@@ -772,9 +791,8 @@ async function doReset(){
     });
     okPin = ""; lastEntry = null;
     document.getElementById("veil-ok").classList.remove("on");
-    await load();
     try{ await loadArchives(); }catch(e){}
-    buildNames();
+    await load();
     drawBoard();
     toast.innerHTML = '<div class="toast">&lt;' + w.label + '&gt;으로 저장하고 메달을 수여했습니다</div>';
   }catch(e){
@@ -873,10 +891,9 @@ async function undo(){
   buildNames();
   buildPad();
   setAmount(0);
+  try{ await loadArchives(); }catch(e){}
   try{ await load(); }
   catch(e){ note("기록을 불러오지 못했습니다 · 연결을 확인해 주세요"); }
-  try{ await loadArchives(); buildNames(); }
-  catch(e){}
 })();
 </script>
 </body>
