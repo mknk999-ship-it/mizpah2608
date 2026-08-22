@@ -86,7 +86,7 @@ body{
 .name:hover::before,.name:focus-visible::before{opacity:.85}
 .name:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
 .name{display:flex;flex-direction:column;align-items:center;gap:7px;padding:20px 10px 15px}
-.name .badges{margin-left:0;flex-wrap:wrap;justify-content:center;min-height:16px}
+.name .badges{margin-left:0;flex-wrap:wrap;justify-content:center;min-height:18px}
 .name .total{font-family:var(--mono);font-weight:400;font-size:11.5px;color:var(--ink-dim);letter-spacing:.04em}
 .name .total b{font-weight:700;color:var(--ink);font-size:13px}
 
@@ -181,7 +181,8 @@ body{
 .m3{background:linear-gradient(155deg,#EABA92,#AE7346 52%,#6B4224);color:#FFF1E4}
 .rank-n{font-family:var(--mono);font-size:14px;color:var(--ink-dim);text-align:center;width:32px}
 
-.badges{display:inline-flex;align-items:flex-start;gap:4px;margin-left:7px;vertical-align:-3px}
+/* ── 메달 · 다이아 뱃지 ── */
+.badges{display:inline-flex;align-items:center;gap:5px;margin-left:7px;vertical-align:-4px}
 .bdg{position:relative;display:inline-block;width:12px;height:16px;flex:none}
 .bdg::before{content:"";position:absolute;left:3px;top:8px;width:6px;height:7px;
   background:var(--mb);opacity:.6;
@@ -192,6 +193,9 @@ body{
 .b1{--ma:#F7DE93;--mb:#C9A03F;--mc:#8A6819}
 .b2{--ma:#F3F6FA;--mb:#B4BCC8;--mc:#6F7887}
 .b3{--ma:#EABA92;--mb:#AE7346;--mc:#6B4224}
+.dia{width:18px;height:18px;display:inline-block;flex:none;
+  filter:drop-shadow(0 1px 2px rgba(80,120,160,.35))}
+.sep{width:1px;height:12px;background:rgba(46,40,34,.14);margin:0 2px;flex:none}
 
 .person{min-width:0}
 .person .nm{font-family:var(--display);font-size:17px;margin-bottom:7px}
@@ -261,6 +265,21 @@ body{
 .shakes{animation:shake .4s}
 @keyframes shake{0%,100%{transform:none}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 
+/* 마감 주차 선택 */
+.wk{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  margin:16px 0 6px;background:var(--paper);border:1px solid rgba(46,40,34,.12);border-radius:3px;padding:6px;
+}
+.wk button{
+  cursor:pointer;background:transparent;border:0;width:40px;height:40px;
+  font-family:var(--mono);font-size:16px;color:var(--ink-dim);border-radius:3px;
+}
+.wk button:hover{background:var(--paper-3);color:var(--clay)}
+.wk .lbl{font-family:var(--display);font-size:17px;color:var(--clay);text-align:center;flex:1}
+.wk-range{text-align:center;font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);margin-bottom:4px}
+.wk-warn{text-align:center;font-size:11.5px;color:#B85C3E;line-height:1.6;min-height:18px;margin-top:6px}
+.wk-warn:empty{display:none}
+
 @media (max-width:360px){
   .names{grid-template-columns:1fr}
   .amount{font-size:38px}
@@ -272,6 +291,22 @@ body{
 </style>
 </head>
 <body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gA1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="#CFE2F1"/><stop offset="1" stop-color="#6C9BBD"/></linearGradient>
+    <linearGradient id="gA2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EAF3FA"/><stop offset="1" stop-color="#3F6E92"/></linearGradient>
+    <symbol id="dia" viewBox="0 0 20 20">
+      <polygon points="3,7 7,3 13,3 17,7 10,18" fill="url(#gA2)"/>
+      <polygon points="3,7 17,7 10,18" fill="url(#gA1)" opacity=".9"/>
+      <polygon points="7,3 13,3 10,7" fill="#fff" opacity=".85"/>
+      <polygon points="3,7 7,3 10,7" fill="#DDEBF5"/>
+      <polygon points="13,3 17,7 10,7" fill="#B9D3E6"/>
+      <polyline points="3,7 17,7" stroke="#fff" stroke-width=".6" opacity=".7"/>
+    </symbol>
+  </defs>
+</svg>
+
 <div class="shell">
 
   <div class="mark">
@@ -348,8 +383,15 @@ body{
 
 <div class="veil" id="veil-ok">
   <div class="card">
-    <h3>정말 초기화할까요?</h3>
-    <p class="cap">현재 기록은 <b id="ok-week">—</b>으로 저장되고<br>1·2·3위에게 금·은·동메달이 수여됩니다<br>랭킹은 0장부터 다시 시작합니다</p>
+    <h3>어느 주를 마감할까요?</h3>
+    <p class="cap">현재 랭킹이 아래 주차 기록으로 저장되고<br>1·2·3위에게 메달이 수여됩니다</p>
+    <div class="wk">
+      <button id="wk-prev" title="한 주 전">&#8249;</button>
+      <span class="lbl" id="wk-label">—</span>
+      <button id="wk-next" title="한 주 후">&#8250;</button>
+    </div>
+    <p class="wk-range" id="wk-range"></p>
+    <p class="wk-warn" id="wk-warn"></p>
     <button class="solid" id="ok-go">마감하고 초기화</button>
     <button class="back" id="ok-cancel">취소</button>
   </div>
@@ -377,6 +419,9 @@ let medals = {};
 let archFrom = "s-who";
 let pin = "";
 let okPin = "";
+let wkOffset = 0;      // 마감 주차 조정 (0 = 지난주)
+let wkInfo = null;     // 현재 선택된 마감 주차
+let wkExists = false;  // 같은 주차 기록이 이미 있는지
 
 function blank(){
   const o = {};
@@ -387,17 +432,27 @@ function note(msg){
   document.getElementById("mode-note").textContent = msg || "";
 }
 
+/* 주차 계산: 기준일이 속한 주(일~토) */
 function weekInfo(d){
   const now = d || new Date();
   const sun = new Date(now);
+  sun.setHours(0,0,0,0);
   sun.setDate(now.getDate() - now.getDay());
+  const sat = new Date(sun); sat.setDate(sun.getDate() + 6);
   const y = sun.getFullYear(), m = sun.getMonth() + 1;
   const w = Math.floor((sun.getDate() - 1) / 7) + 1;
   return {
     key: y + "-" + String(m).padStart(2,"0") + "-W" + w,
     year: y, month: m, week: w,
-    label: m + "월 " + w + "주 기록"
+    label: m + "월 " + w + "주 기록",
+    range: (sun.getMonth()+1) + "/" + sun.getDate() + " ~ " + (sat.getMonth()+1) + "/" + sat.getDate()
   };
+}
+/* 마감 대상 주차: 기본은 "지난주"(오늘 - 7일), wkOffset로 조정 */
+function closingWeek(){
+  const d = new Date();
+  d.setDate(d.getDate() - 7 + wkOffset * 7);
+  return weekInfo(d);
 }
 
 async function rpc(fn, body){
@@ -439,6 +494,15 @@ async function loadArchives(){
   archives = await r.json();
   tallyMedals();
 }
+async function archiveExists(key){
+  const r = await fetch(
+    SUPA_URL + "/rest/v1/mizpah_archives?select=week_key&week_key=eq." + encodeURIComponent(key),
+    { headers: H, cache: "no-store" }
+  );
+  if(!r.ok) throw new Error(await r.text());
+  const rows = await r.json();
+  return rows.length > 0;
+}
 
 /* ── 순위 · 메달 (동점은 공동 순위) ─────────── */
 
@@ -465,13 +529,24 @@ function tallyMedals(){
   });
   medals = t;
 }
+/* 동3 → 은1, 은3 → 금1, 금3 → 다이아1 (승급 후 남은 것만 표시) */
 function badgeHTML(name){
   const m = medals[name];
   if(!m) return "";
+  let g = m.g, s = m.s, b = m.b;
+
+  s += Math.floor(b / 3); b = b % 3;        // 동 → 은
+  g += Math.floor(s / 3); s = s % 3;        // 은 → 금
+  const d = Math.floor(g / 3); g = g % 3;   // 금 → 다이아
+
   let h = "";
-  [["b1",m.g],["b2",m.s],["b3",m.b]].forEach(([cls,n]) => {
-    for(let i = 0; i < n; i++) h += '<i class="bdg ' + cls + '"></i>';
+  for(let i = 0; i < d; i++) h += '<svg class="dia"><use href="#dia"/></svg>';
+  let medalH = "";
+  [["b1",g],["b2",s],["b3",b]].forEach(([cls,n]) => {
+    for(let i = 0; i < n; i++) medalH += '<i class="bdg ' + cls + '"></i>';
   });
+  if(h && medalH) h += '<i class="sep"></i>';
+  h += medalH;
   return h ? '<span class="badges">' + h + '</span>' : "";
 }
 function anyMedals(){
@@ -661,7 +736,6 @@ async function openArchives(from){
     return;
   }
 
-  // 연도별로 묶고, 각 연도 안에서는 week_key 내림차순(최신 주가 위)
   const byYear = {};
   archives.forEach(a => { (byYear[a.year] = byYear[a.year] || []).push(a); });
 
@@ -769,8 +843,8 @@ async function verifyPin(){
   if(ok){
     okPin = pin;
     closePin();
-    const w = weekInfo();
-    document.getElementById("ok-week").textContent = "<" + w.label + ">";
+    wkOffset = 0;
+    await refreshWeekPick();
     document.getElementById("veil-ok").classList.add("on");
   }else{
     const card = document.getElementById("pin-card");
@@ -779,15 +853,40 @@ async function verifyPin(){
     pin = ""; drawDots();
   }
 }
+
+/* 마감 주차 표시 + 중복 확인 */
+async function refreshWeekPick(){
+  wkInfo = closingWeek();
+  document.getElementById("wk-label").textContent = wkInfo.month + "월 " + wkInfo.week + "주";
+  document.getElementById("wk-range").textContent = wkInfo.range;
+  const warn = document.getElementById("wk-warn");
+  const go = document.getElementById("ok-go");
+  warn.textContent = "확인하는 중…";
+  wkExists = false;
+  try{ wkExists = await archiveExists(wkInfo.key); }
+  catch(e){ warn.textContent = "기존 기록을 확인하지 못했습니다"; }
+  if(wkExists){
+    warn.textContent = "이 주차 기록이 이미 있습니다.\n다른 주를 고르거나, 덮어쓰려면 아래를 누르세요";
+    go.textContent = "기존 기록 덮어쓰고 초기화";
+  }else{
+    warn.textContent = "";
+    go.textContent = "마감하고 초기화";
+  }
+}
+document.getElementById("wk-prev").onclick = () => { wkOffset--; refreshWeekPick(); };
+document.getElementById("wk-next").onclick = () => { if(wkOffset < 1){ wkOffset++; refreshWeekPick(); } };
+
 async function doReset(){
   const btn = document.getElementById("ok-go");
   const toast = document.getElementById("toast");
-  const w = weekInfo();
+  const w = wkInfo;
+  if(wkExists && !confirm(w.month + "월 " + w.week + "주 기록을 정말 덮어쓸까요?\n이전 기록은 복구할 수 없습니다.")) return;
   btn.disabled = true; btn.textContent = "저장하는 중…";
   try{
     await rpc("mizpah_archive_reset", {
       p_pin: okPin, p_week_key: w.key, p_year: w.year,
-      p_month: w.month, p_week: w.week, p_label: w.label
+      p_month: w.month, p_week: w.week, p_label: w.label,
+      p_force: wkExists
     });
     okPin = ""; lastEntry = null;
     document.getElementById("veil-ok").classList.remove("on");
@@ -797,7 +896,11 @@ async function doReset(){
     toast.innerHTML = '<div class="toast">&lt;' + w.label + '&gt;으로 저장하고 메달을 수여했습니다</div>';
   }catch(e){
     document.getElementById("veil-ok").classList.remove("on");
-    toast.innerHTML = '<div class="toast" style="color:#B85C3E">초기화에 실패했습니다</div>';
+    const msg = String(e && e.message || "");
+    toast.innerHTML = '<div class="toast" style="color:#B85C3E">' +
+      (msg.indexOf("already") >= 0 || msg.indexOf("duplicate") >= 0
+        ? "같은 주차 기록이 이미 있어 저장하지 않았습니다"
+        : "초기화에 실패했습니다") + '</div>';
   }
   btn.disabled = false; btn.textContent = "마감하고 초기화";
 }
