@@ -54,6 +54,7 @@ body{
   margin-top:12px;font-size:10.5px;letter-spacing:.04em;color:#B85C3E;
 }
 .mark .mode-note:empty{display:none}
+.mark.hide{display:none}
 
 /* 상단바 */
 .topbar{
@@ -161,16 +162,23 @@ body{
   background:linear-gradient(90deg,transparent,var(--stone),transparent);
 }
 .version-tag{
-  cursor:pointer;appearance:none;background:transparent;
+  display:inline-block;
   border:1px solid rgba(46,40,34,.14);border-radius:20px;
   font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-dim);
-  padding:5px 13px;transition:border-color .2s,color .2s;
+  padding:5px 13px;
 }
-.version-tag b{color:var(--clay);font-weight:700;margin-left:3px}
-.version-tag:hover,.version-tag:focus-visible{border-color:var(--clay);color:var(--ink)}
+.version-tag b{color:var(--ink);font-weight:800;margin-left:3px}
+.changelog-link{
+  display:block;width:fit-content;margin:12px auto 0;cursor:pointer;appearance:none;background:none;border:0;
+  font-family:var(--body);font-size:12px;color:var(--ink-dim);
+  text-decoration:underline;text-underline-offset:3px;letter-spacing:.02em;
+  transition:color .2s;
+}
+.changelog-link:hover,.changelog-link:focus-visible{color:var(--clay)}
 .footer-copy{margin-top:11px;font-size:10.5px;color:var(--stone);letter-spacing:.04em}
 
 /* 업데이트 내역 */
+#s-changelog{padding-top:10px}
 .changelog-list{display:flex;flex-direction:column;gap:24px;margin:26px 0 8px}
 .cl-entry{border-left:2px solid rgba(196,180,156,.45);padding-left:16px}
 .cl-head{display:flex;align-items:baseline;gap:9px;margin-bottom:9px}
@@ -483,7 +491,8 @@ body{
 
     <div class="app-footer">
       <div class="app-footer-rule"></div>
-      <button class="version-tag" id="go-changelog">MIZPAH <b id="footer-version-num">v1.2</b></button>
+      <div class="version-tag">MIZPAH <b id="footer-version-num">v1.2</b></div>
+      <button class="changelog-link" id="go-changelog">업데이트 내역 확인</button>
       <p class="footer-copy">말씀과 기도, 함께 쌓아가는 기록</p>
     </div>
   </section>
@@ -536,7 +545,7 @@ body{
 
   <section id="s-changelog" class="screen">
     <p class="ask" style="font-size:19px;margin-bottom:4px">업데이트 내역</p>
-    <p class="sub">MIZPAH가 그동안 걸어온 길입니다</p>
+    <p class="sub">MIZPAH 체계 업데이트 기록입니다</p>
 
     <div class="changelog-list">
       <div class="cl-entry">
@@ -915,6 +924,7 @@ function cumTotal(n){
 function show(id){
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("on"));
   document.getElementById(id).classList.add("on");
+  document.querySelector(".mark").classList.toggle("hide", id === "s-changelog");
   window.scrollTo({top:0, behavior:"instant"});
 }
 
