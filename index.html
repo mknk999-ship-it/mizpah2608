@@ -97,6 +97,11 @@ body{
   padding:15px;transition:border-color .22s,color .22s;
 }
 .ghost.gap{margin-top:22px}
+.section-divider{
+  width:100%;height:1px;margin:26px 0 4px;
+  background:linear-gradient(90deg,transparent,var(--stone),transparent);
+  opacity:.55;
+}
 .ghost:hover,.ghost:focus-visible{border-color:var(--clay);color:var(--clay)}
 .ghost:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
 
@@ -366,7 +371,6 @@ body{
       <p class="leader-next" id="leader-next"></p>
       <div class="leader-btns">
         <button class="leader-btn" id="leader-advance">다음 인도자로 넘기기</button>
-        <button class="leader-btn" id="leader-shuffle">인도자 순서 추첨</button>
       </div>
       <div id="leader-toast"></div>
     </div>
@@ -374,6 +378,9 @@ body{
     <div class="names" id="names"></div>
     <button class="ghost gap" id="go-rank">랭킹보드 보러가기</button>
     <button class="ghost" id="go-arch-1">지난 기록 보기</button>
+
+    <div class="section-divider"></div>
+    <button class="ghost" id="leader-shuffle">인도자 순서 추첨</button>
   </section>
 
   <section id="s-add" class="screen">
