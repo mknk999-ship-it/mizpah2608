@@ -280,6 +280,44 @@ body{
 .wk-warn{text-align:center;font-size:11.5px;color:#B85C3E;line-height:1.6;min-height:18px;margin-top:6px}
 .wk-warn:empty{display:none}
 
+/* 인도자 순서 */
+.leader{text-align:center;margin-bottom:30px}
+.leader.hide{display:none}
+.leader-eyebrow{font-size:11.5px;letter-spacing:.2em;color:var(--ink-dim);margin-bottom:14px}
+.leader-seal{
+  position:relative;width:120px;height:76px;margin:0 auto;border-radius:14px;
+  background:radial-gradient(circle at 35% 25%, #f0dfb4, #d3b366 70%, #b8933f);
+  box-shadow:0 5px 14px rgba(160,130,60,.32), inset 0 0 0 3px rgba(255,250,235,.55);
+  display:flex;align-items:center;justify-content:center;
+}
+.leader-seal::after{
+  content:"";position:absolute;inset:6px;border-radius:9px;
+  border:1px dashed rgba(90,70,30,.35);
+}
+.leader-seal span{
+  position:relative;z-index:1;
+  font-family:var(--display);font-weight:700;font-size:25px;letter-spacing:.14em;color:#4a3a18;
+}
+.leader-seal.pop{animation:leaderPop .45s ease}
+@keyframes leaderPop{0%{transform:scale(1)}35%{transform:scale(1.12)}100%{transform:scale(1)}}
+.leader-mizpah{font-size:12px;letter-spacing:.14em;color:#a3823f;margin-top:8px}
+.leader-order{font-size:13px;color:#9a9184;margin-top:14px;letter-spacing:.02em;line-height:1.7}
+.leader-order .arrow{color:#cfc4a9}
+.leader-order .cur{font-weight:700;color:#5a4526}
+.leader-order.shuffle{animation:leaderFlicker .18s steps(1) infinite}
+@keyframes leaderFlicker{0%,100%{opacity:1}50%{opacity:.5}}
+.leader-next{font-size:12.5px;color:#9a9184;margin-top:6px}
+.leader-next b{color:#5a4f3b;font-weight:700}
+.leader-btns{display:flex;justify-content:center;gap:10px;margin-top:18px}
+.leader-btn{
+  cursor:pointer;background:#fbf7ee;border:1.5px solid #d9cbab;border-radius:10px;
+  color:#8a744d;font-family:var(--body);font-weight:700;font-size:12.5px;letter-spacing:.08em;
+  padding:9px 16px;transition:background .2s,border-color .2s;
+}
+.leader-btn:hover{border-color:#c9b585}
+.leader-btn:disabled{opacity:.5;cursor:default}
+#leader-toast{min-height:4px}
+
 @media (max-width:360px){
   .names{grid-template-columns:1fr}
   .amount{font-size:38px}
@@ -319,6 +357,20 @@ body{
   <section id="s-who" class="screen on">
     <p class="ask">당신은 누구입니까?</p>
     <p class="sub">이름을 고르면 그 이름으로 기록됩니다</p>
+
+    <div class="leader hide" id="leader-box">
+      <p class="leader-eyebrow">이번 주 인도자</p>
+      <div class="leader-seal" id="leader-seal"><span id="leader-name">—</span></div>
+      <p class="leader-mizpah">MIZPAH</p>
+      <p class="leader-order" id="leader-order"></p>
+      <p class="leader-next" id="leader-next"></p>
+      <div class="leader-btns">
+        <button class="leader-btn" id="leader-advance">다음 인도자로 넘기기</button>
+        <button class="leader-btn" id="leader-shuffle">인도자 순서 추첨</button>
+      </div>
+      <div id="leader-toast"></div>
+    </div>
+
     <div class="names" id="names"></div>
     <button class="ghost gap" id="go-rank">랭킹보드 보러가기</button>
     <button class="ghost" id="go-arch-1">지난 기록 보기</button>
@@ -419,6 +471,8 @@ let medals = {};
 let archFrom = "s-who";
 let pin = "";
 let okPin = "";
+let pinPurpose = "reset"; // "reset" | "leader"
+let leaderData = null;    // {names:[...], current_idx:N}
 let wkOffset = 0;      // 마감 주차 조정 (0 = 지난주)
 let wkInfo = null;     // 현재 선택된 마감 주차
 let wkExists = false;  // 같은 주차 기록이 이미 있는지
@@ -502,6 +556,129 @@ async function archiveExists(key){
   if(!r.ok) throw new Error(await r.text());
   const rows = await r.json();
   return rows.length > 0;
+}
+
+/* ── 인도자 순서 ──────────────────────────── */
+
+async function loadLeader(){
+  const r = await fetch(
+    SUPA_URL + "/rest/v1/mizpah_leader?select=names,current_idx,updated_at&id=eq.1",
+    { headers: H, cache: "no-store" }
+  );
+  if(!r.ok) throw new Error(await r.text());
+  const rows = await r.json();
+  if(!rows.length || !Array.isArray(rows[0].names) || !rows[0].names.length){
+    throw new Error("no leader row");
+  }
+  leaderData = { names: rows[0].names, current_idx: rows[0].current_idx || 0 };
+}
+async function updateLeader(patch){
+  const body = Object.assign({}, patch, { updated_at: new Date().toISOString() });
+  const r = await fetch(SUPA_URL + "/rest/v1/mizpah_leader?id=eq.1", {
+    method: "PATCH",
+    headers: Object.assign({}, H, { "Prefer": "return=minimal" }),
+    body: JSON.stringify(body)
+  });
+  if(!r.ok) throw new Error(await r.text());
+}
+function renderLeader(){
+  const box = document.getElementById("leader-box");
+  if(!leaderData){ box.classList.add("hide"); return; }
+  box.classList.remove("hide");
+  const names = leaderData.names;
+  const idx = ((leaderData.current_idx % names.length) + names.length) % names.length;
+  const next = names[(idx + 1) % names.length];
+  document.getElementById("leader-name").textContent = names[idx];
+  document.getElementById("leader-order").innerHTML = names.map((n, i) =>
+    i === idx ? '<span class="cur">' + n + '</span>' : n
+  ).join('<span class="arrow"> &rarr; </span>');
+  document.getElementById("leader-next").innerHTML =
+    "다음 주 인도자 · <b>" + next + "</b>";
+}
+function popSeal(){
+  const seal = document.getElementById("leader-seal");
+  seal.classList.remove("pop");
+  void seal.offsetWidth;
+  seal.classList.add("pop");
+}
+function leaderToast(msg, isErr){
+  const t = document.getElementById("leader-toast");
+  t.innerHTML = '<div class="toast"' + (isErr ? ' style="color:#B85C3E"' : '') + '>' + msg + '</div>';
+  setTimeout(() => { t.innerHTML = ""; }, 3200);
+}
+async function advanceLeader(){
+  if(!leaderData) return;
+  const names = leaderData.names;
+  const prevIdx = leaderData.current_idx;
+  const nextIdx = (prevIdx + 1) % names.length;
+  const nextName = names[nextIdx];
+  if(!confirm("이번 주 인도자를 " + nextName + " 님으로 넘길까요?")) return;
+
+  const advBtn = document.getElementById("leader-advance");
+  const shuBtn = document.getElementById("leader-shuffle");
+  advBtn.disabled = true; shuBtn.disabled = true;
+  try{
+    await updateLeader({ current_idx: nextIdx });
+    leaderData.current_idx = nextIdx;
+    renderLeader();
+    popSeal();
+    leaderToast("이번 주 인도자가 " + nextName + " 님으로 변경되었습니다");
+  }catch(e){
+    leaderData.current_idx = prevIdx;
+    renderLeader();
+    leaderToast("변경에 실패했습니다 · 다시 시도해 주세요", true);
+  }
+  advBtn.disabled = false; shuBtn.disabled = false;
+}
+async function confirmLeaderShuffle(){
+  if(!leaderData){ leaderToast("순서 정보를 불러오지 못했습니다", true); return; }
+  if(!confirm("여섯 명의 순서를 처음부터 새로 뽑습니다. 기존 순서는 사라져요. 진행할까요?")) return;
+  await runLeaderShuffle();
+}
+async function runLeaderShuffle(){
+  const advBtn = document.getElementById("leader-advance");
+  const shuBtn = document.getElementById("leader-shuffle");
+  advBtn.disabled = true; shuBtn.disabled = true;
+  const orderEl = document.getElementById("leader-order");
+  orderEl.classList.add("shuffle");
+  const original = leaderData.names.slice();
+
+  const shuffleTimer = setInterval(() => {
+    const tmp = original.slice();
+    for(let i = tmp.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [tmp[i], tmp[j]] = [tmp[j], tmp[i]];
+    }
+    orderEl.innerHTML = tmp.map((n, i) =>
+      i === 0 ? '<span class="cur">' + n + '</span>' : n
+    ).join('<span class="arrow"> &rarr; </span>');
+  }, 90);
+
+  await new Promise(res => setTimeout(res, 1200));
+  clearInterval(shuffleTimer);
+  orderEl.classList.remove("shuffle");
+
+  const shuffled = original.slice();
+  for(let i = shuffled.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  const prevNames = leaderData.names, prevIdx = leaderData.current_idx;
+  try{
+    await updateLeader({ names: shuffled, current_idx: 0 });
+    leaderData.names = shuffled;
+    leaderData.current_idx = 0;
+    renderLeader();
+    popSeal();
+    leaderToast("새 순서가 정해졌습니다 · 이번 주 인도자 " + shuffled[0] + " 님");
+  }catch(e){
+    leaderData.names = prevNames;
+    leaderData.current_idx = prevIdx;
+    renderLeader();
+    leaderToast("추첨 결과를 저장하지 못했습니다", true);
+  }
+  advBtn.disabled = false; shuBtn.disabled = false;
 }
 
 /* ── 순위 · 메달 (동점은 공동 순위) ─────────── */
@@ -837,7 +1014,8 @@ function buildPad(){
     pad.appendChild(b);
   });
 }
-function openPin(){
+function openPin(purpose){
+  pinPurpose = purpose || "reset";
   pin = ""; drawDots();
   document.getElementById("veil-pin").classList.add("on");
 }
@@ -849,8 +1027,13 @@ async function verifyPin(){
   let ok = false;
   try{ ok = await rpc("mizpah_check_pin", { p_pin: pin }); }catch(e){ ok = false; }
   if(ok){
-    okPin = pin;
+    const wasPin = pin, purpose = pinPurpose;
     closePin();
+    if(purpose === "leader"){
+      await confirmLeaderShuffle();
+      return;
+    }
+    okPin = wasPin;
     wkOffset = 0;
     await refreshWeekPick();
     document.getElementById("veil-ok").classList.add("on");
@@ -933,7 +1116,7 @@ document.getElementById("go-arch-2").onclick = () => openArchives("s-rank");
 document.getElementById("arch-back").onclick = () => show(archFrom);
 document.getElementById("arch-one-back").onclick = () => show("s-archs");
 
-document.getElementById("reset-btn").onclick = openPin;
+document.getElementById("reset-btn").onclick = () => openPin("reset");
 document.getElementById("ok-cancel").onclick = () => {
   okPin = "";
   document.getElementById("veil-ok").classList.remove("on");
@@ -942,6 +1125,9 @@ document.getElementById("ok-go").onclick = doReset;
 document.getElementById("veil-pin").onclick = (e) => {
   if(e.target.id === "veil-pin") closePin();
 };
+
+document.getElementById("leader-advance").onclick = advanceLeader;
+document.getElementById("leader-shuffle").onclick = () => openPin("leader");
 
 document.querySelectorAll(".quick button").forEach(b => {
   b.onclick = () => setAmount(amount + parseInt(b.dataset.add, 10));
@@ -1005,6 +1191,8 @@ async function undo(){
   try{ await loadArchives(); }catch(e){}
   try{ await load(); }
   catch(e){ note("기록을 불러오지 못했습니다 · 연결을 확인해 주세요"); }
+  try{ await loadLeader(); renderLeader(); }
+  catch(e){ document.getElementById("leader-box").classList.add("hide"); }
 })();
 </script>
 </body>
