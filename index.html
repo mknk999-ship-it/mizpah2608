@@ -35,7 +35,7 @@ body{
   font-family:var(--body);
   font-weight:300;
   -webkit-font-smoothing:antialiased;
-  padding:34px 20px 56px;
+  padding:0 20px 56px;
   display:flex;justify-content:center;
 }
 .shell{width:100%;max-width:520px}
@@ -54,6 +54,55 @@ body{
   margin-top:12px;font-size:10.5px;letter-spacing:.04em;color:#B85C3E;
 }
 .mark .mode-note:empty{display:none}
+
+/* 상단바 */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+  width:calc(100% + 40px);margin:0 -20px 28px;padding:14px 20px;
+  background:rgba(246,242,234,.88);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border-bottom:1px solid rgba(46,40,34,.08);
+}
+.topbar-logo{
+  justify-self:center;
+  font-family:var(--display);font-weight:700;font-size:15px;
+  letter-spacing:.24em;text-indent:.24em;color:var(--ink);
+}
+.icon-btn{
+  cursor:pointer;appearance:none;background:transparent;border:0;
+  width:36px;height:36px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink-dim);transition:background .18s,color .18s;
+}
+.icon-btn:hover,.icon-btn:focus-visible{background:rgba(46,40,34,.07);color:var(--ink)}
+.icon-btn svg{width:19px;height:19px}
+.topbar-home{justify-self:start}
+.topbar-menu{justify-self:end}
+
+/* 메뉴 패널 */
+.menu-overlay{position:fixed;inset:0;background:rgba(46,40,34,.32);display:none;z-index:45}
+.menu-overlay.on{display:block}
+.menu-panel{
+  position:fixed;top:60px;right:16px;width:216px;
+  background:var(--paper-2);border:1px solid rgba(46,40,34,.08);border-radius:12px;
+  box-shadow:0 18px 40px rgba(46,40,34,.28);padding:8px;
+  animation:menuDrop .2s cubic-bezier(.2,.7,.3,1) both;
+}
+@keyframes menuDrop{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}
+.menu-item{
+  display:block;width:100%;text-align:left;cursor:pointer;
+  background:transparent;border:0;border-radius:7px;padding:12px 12px;
+  font-family:var(--body);font-size:13.5px;font-weight:400;color:var(--ink);
+  transition:background .15s;
+}
+.menu-item:hover,.menu-item:focus-visible{background:var(--paper-3)}
+.menu-sep{height:1px;margin:6px 5px;background:rgba(46,40,34,.08)}
+.menu-version{
+  padding:10px 12px 4px;text-align:center;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--ink-dim);
+}
+.menu-version b{color:var(--clay);font-weight:700}
 
 .screen{display:none}
 .screen.on{display:block;animation:rise .5s cubic-bezier(.2,.7,.3,1) both}
@@ -104,6 +153,32 @@ body{
 }
 .leader-order-box{text-align:center;margin-top:22px}
 .leader-order-box.hide{display:none}
+
+/* 하단 버전 표시 */
+.app-footer{margin-top:44px;text-align:center}
+.app-footer-rule{
+  width:60px;height:1px;margin:0 auto 16px;
+  background:linear-gradient(90deg,transparent,var(--stone),transparent);
+}
+.version-tag{
+  cursor:pointer;appearance:none;background:transparent;
+  border:1px solid rgba(46,40,34,.14);border-radius:20px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-dim);
+  padding:5px 13px;transition:border-color .2s,color .2s;
+}
+.version-tag b{color:var(--clay);font-weight:700;margin-left:3px}
+.version-tag:hover,.version-tag:focus-visible{border-color:var(--clay);color:var(--ink)}
+.footer-copy{margin-top:11px;font-size:10.5px;color:var(--stone);letter-spacing:.04em}
+
+/* 업데이트 내역 */
+.changelog-list{display:flex;flex-direction:column;gap:24px;margin:26px 0 8px}
+.cl-entry{border-left:2px solid rgba(196,180,156,.45);padding-left:16px}
+.cl-head{display:flex;align-items:baseline;gap:9px;margin-bottom:9px}
+.cl-ver{font-family:var(--display);font-weight:700;font-size:16px;color:var(--clay)}
+.cl-date{font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);letter-spacing:.04em}
+.cl-items{list-style:none;display:flex;flex-direction:column;gap:7px}
+.cl-items li{font-size:12.5px;color:var(--ink);line-height:1.6;position:relative;padding-left:14px}
+.cl-items li::before{content:"·";position:absolute;left:0;color:var(--stone)}
 .ghost:hover,.ghost:focus-visible{border-color:var(--clay);color:var(--clay)}
 .ghost:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
 
@@ -354,6 +429,27 @@ body{
 
 <div class="shell">
 
+  <div class="topbar">
+    <button class="icon-btn topbar-home" id="topbar-home" aria-label="홈으로">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg>
+    </button>
+    <span class="topbar-logo">MIZPAH</span>
+    <button class="icon-btn topbar-menu" id="topbar-menu" aria-label="메뉴 열기">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    </button>
+  </div>
+
+  <div class="menu-overlay" id="menu-overlay">
+    <nav class="menu-panel" id="menu-panel">
+      <button class="menu-item" id="menu-rank">이번주 말씀랭킹</button>
+      <button class="menu-item" id="menu-archive">지난 기록 보기</button>
+      <button class="menu-item" id="menu-leader">인도자 순서 관리</button>
+      <div class="menu-sep"></div>
+      <button class="menu-item" id="menu-changelog">업데이트 내역</button>
+      <div class="menu-version">MIZPAH <b id="menu-version-num">v1.2</b></div>
+    </nav>
+  </div>
+
   <div class="mark">
     <h1>미스바 미션</h1>
     <div class="rule"></div>
@@ -366,7 +462,7 @@ body{
     <p class="sub">이름을 고르면 그 이름으로 기록됩니다</p>
 
     <div class="names" id="names"></div>
-    <button class="ghost gap" id="go-rank">랭킹보드 보러가기</button>
+    <button class="ghost gap" id="go-rank">이번주 말씀랭킹</button>
     <button class="ghost" id="go-arch-1">지난 기록 보기</button>
 
     <div class="section-divider"></div>
@@ -383,6 +479,12 @@ body{
         <button class="leader-btn" id="leader-shuffle">인도자 순서 추첨</button>
       </div>
       <div id="leader-toast"></div>
+    </div>
+
+    <div class="app-footer">
+      <div class="app-footer-rule"></div>
+      <button class="version-tag" id="go-changelog">MIZPAH <b id="footer-version-num">v1.2</b></button>
+      <p class="footer-copy">말씀과 기도, 함께 쌓아가는 기록</p>
     </div>
   </section>
 
@@ -432,6 +534,40 @@ body{
     <button class="ghost gap" id="arch-one-back">목록으로</button>
   </section>
 
+  <section id="s-changelog" class="screen">
+    <p class="ask" style="font-size:19px;margin-bottom:4px">업데이트 내역</p>
+    <p class="sub">MIZPAH가 그동안 걸어온 길입니다</p>
+
+    <div class="changelog-list">
+      <div class="cl-entry">
+        <div class="cl-head"><span class="cl-ver">v1.2</span><span class="cl-date">2026.08</span></div>
+        <ul class="cl-items">
+          <li>상단바 추가 — 홈 · MIZPAH 로고 · 메뉴</li>
+          <li>메뉴에서 랭킹·지난 기록·인도자 순서·업데이트 내역으로 바로 이동</li>
+          <li>"이번주 말씀랭킹"으로 명칭 변경</li>
+          <li>화면 하단에 버전 정보와 업데이트 내역 페이지 추가</li>
+        </ul>
+      </div>
+      <div class="cl-entry">
+        <div class="cl-head"><span class="cl-ver">v1.1</span><span class="cl-date">2026.08</span></div>
+        <ul class="cl-items">
+          <li>이번 주 인도자 순서 시스템 도입</li>
+          <li>인도자 순서 추첨 · 다음 인도자로 넘기기 기능 추가</li>
+          <li>인도자 관련 요소를 화면 하단으로 재배치하고 구분선 추가</li>
+        </ul>
+      </div>
+      <div class="cl-entry">
+        <div class="cl-head"><span class="cl-ver">v1.0</span><span class="cl-date">—</span></div>
+        <ul class="cl-items">
+          <li>이름별 말씀 기록 및 누적 랭킹보드</li>
+          <li>지난 기록(주간 마감) 보관함</li>
+        </ul>
+      </div>
+    </div>
+
+    <button class="ghost gap" id="changelog-back">돌아가기</button>
+  </section>
+
 </div>
 
 <div class="veil" id="veil-pin">
@@ -479,6 +615,7 @@ let lastEntry = null;
 let archives = [];
 let medals = {};
 let archFrom = "s-who";
+let clFrom = "s-who";
 let pin = "";
 let okPin = "";
 let pinPurpose = "reset"; // "reset" | "leader"
@@ -919,6 +1056,13 @@ function reorder(jump, fromTotal){
   if(mine) countUp(mine, fromTotal, data[jump.name].total);
 }
 
+/* ── 업데이트 내역 ─────────────────────────── */
+
+function openChangelog(from){
+  clFrom = from;
+  show("s-changelog");
+}
+
 /* ── 지난 기록 (마감된 모든 주를 최신순으로) ───── */
 
 async function openArchives(from){
@@ -1127,6 +1271,45 @@ document.getElementById("go-arch-1").onclick = () => openArchives("s-who");
 document.getElementById("go-arch-2").onclick = () => openArchives("s-rank");
 document.getElementById("arch-back").onclick = () => show(archFrom);
 document.getElementById("arch-one-back").onclick = () => show("s-archs");
+document.getElementById("go-changelog").onclick = () => openChangelog("s-who");
+document.getElementById("changelog-back").onclick = () => show(clFrom);
+
+/* ── 상단바 · 메뉴 ────────────────────────── */
+
+function closeMenu(){
+  document.getElementById("menu-overlay").classList.remove("on");
+}
+document.getElementById("topbar-home").onclick = () => {
+  closeMenu();
+  show("s-who");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+document.getElementById("topbar-menu").onclick = () => {
+  document.getElementById("menu-overlay").classList.add("on");
+};
+document.getElementById("menu-overlay").onclick = (e) => {
+  if(e.target.id === "menu-overlay") closeMenu();
+};
+document.addEventListener("keydown", (e) => {
+  if(e.key === "Escape") closeMenu();
+});
+document.getElementById("menu-rank").onclick = () => {
+  closeMenu();
+  document.getElementById("go-rank").click();
+};
+document.getElementById("menu-archive").onclick = () => {
+  closeMenu();
+  openArchives(document.querySelector(".screen.on").id);
+};
+document.getElementById("menu-leader").onclick = () => {
+  closeMenu();
+  show("s-who");
+  document.getElementById("leader-order-box").scrollIntoView({ behavior: "smooth", block: "center" });
+};
+document.getElementById("menu-changelog").onclick = () => {
+  closeMenu();
+  openChangelog(document.querySelector(".screen.on").id);
+};
 
 document.getElementById("reset-btn").onclick = () => openPin("reset");
 document.getElementById("ok-cancel").onclick = () => {
