@@ -312,7 +312,7 @@ body{
   <div class="mark">
     <h1>미스바 미션</h1>
     <div class="rule"></div>
-    <p>어떻게든 많이 읽어보는 한주</p>
+    <p>말씀과 기도는 매일 최선을 다해야 한다</p>
     <p id="mode-note" class="mode-note"></p>
   </div>
 
@@ -515,8 +515,19 @@ function rankList(records){
     return { name: p.name, total: t, rank: rank };
   });
 }
-function winners(records){
-  return rankList(records).filter(p => p.rank === 1 && p.total > 0);
+function medalLine(records){
+  const groups = {1:[],2:[],3:[]};
+  rankList(records).forEach(p => {
+    if(p.total > 0 && groups[p.rank]) groups[p.rank].push(p.name);
+  });
+  const segs = [];
+  [[1,"b1"],[2,"b2"],[3,"b3"]].forEach(([rank,cls]) => {
+    if(groups[rank].length){
+      segs.push('<span style="margin-right:10px"><i class="bdg ' + cls +
+        '" style="margin-right:6px"></i>' + groups[rank].join(" · ") + '</span>');
+    }
+  });
+  return segs.join("");
 }
 function tallyMedals(){
   const t = {};
@@ -749,13 +760,11 @@ async function openArchives(from){
     byYear[y]
       .sort((a,b) => (a.week_key < b.week_key ? 1 : -1))
       .forEach(a => {
-        const win = winners(a.records);
+        const line = medalLine(a.records);
         const b = document.createElement("button");
         b.className = "weeklink";
         b.innerHTML = "<span>" + a.month + "월 " + a.week + "주</span><small>" +
-          (win.length
-            ? '<i class="bdg b1" style="margin-right:6px"></i>' + win.map(p => p.name).join(" · ")
-            : "기록 없음") +
+          (line || "기록 없음") +
           "</small>";
         b.onclick = () => openArchive(a.week_key);
         box.appendChild(b);
@@ -767,10 +776,9 @@ function openArchive(key){
   const a = archives.find(x => x.week_key === key);
   if(!a) return;
   document.getElementById("arch-title").textContent = a.month + "월 " + a.week + "주 기록";
-  const win = winners(a.records);
-  document.getElementById("arch-sub").textContent =
-    win.length ? "금메달 · " + win.map(p => p.name).join(" · ")
-               : "이 주에는 쌓인 돌이 없습니다";
+  const line = medalLine(a.records);
+  document.getElementById("arch-sub").innerHTML =
+    line || "이 주에는 쌓인 돌이 없습니다";
   drawArchive(a.records || []);
   show("s-arch-one");
 }
