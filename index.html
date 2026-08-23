@@ -102,6 +102,8 @@ body{
   background:linear-gradient(90deg,transparent,var(--stone),transparent);
   opacity:.55;
 }
+.leader-order-box{text-align:center;margin-top:22px}
+.leader-order-box.hide{display:none}
 .ghost:hover,.ghost:focus-visible{border-color:var(--clay);color:var(--clay)}
 .ghost:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
 
@@ -367,12 +369,6 @@ body{
       <p class="leader-eyebrow">이번 주 인도자</p>
       <div class="leader-seal" id="leader-seal"><span id="leader-name">—</span></div>
       <p class="leader-mizpah">MIZPAH</p>
-      <p class="leader-order" id="leader-order"></p>
-      <p class="leader-next" id="leader-next"></p>
-      <div class="leader-btns">
-        <button class="leader-btn" id="leader-advance">다음 인도자로 넘기기</button>
-      </div>
-      <div id="leader-toast"></div>
     </div>
 
     <div class="names" id="names"></div>
@@ -380,7 +376,15 @@ body{
     <button class="ghost" id="go-arch-1">지난 기록 보기</button>
 
     <div class="section-divider"></div>
-    <button class="ghost" id="leader-shuffle">인도자 순서 추첨</button>
+    <div class="leader-order-box hide" id="leader-order-box">
+      <p class="leader-order" id="leader-order"></p>
+      <p class="leader-next" id="leader-next"></p>
+      <div class="leader-btns">
+        <button class="leader-btn" id="leader-advance">다음 인도자로 넘기기</button>
+        <button class="leader-btn" id="leader-shuffle">인도자 순서 추첨</button>
+      </div>
+      <div id="leader-toast"></div>
+    </div>
   </section>
 
   <section id="s-add" class="screen">
@@ -590,8 +594,10 @@ async function updateLeader(patch){
 }
 function renderLeader(){
   const box = document.getElementById("leader-box");
-  if(!leaderData){ box.classList.add("hide"); return; }
+  const orderBox = document.getElementById("leader-order-box");
+  if(!leaderData){ box.classList.add("hide"); orderBox.classList.add("hide"); return; }
   box.classList.remove("hide");
+  orderBox.classList.remove("hide");
   const names = leaderData.names;
   const idx = ((leaderData.current_idx % names.length) + names.length) % names.length;
   const next = names[(idx + 1) % names.length];
@@ -1199,7 +1205,10 @@ async function undo(){
   try{ await load(); }
   catch(e){ note("기록을 불러오지 못했습니다 · 연결을 확인해 주세요"); }
   try{ await loadLeader(); renderLeader(); }
-  catch(e){ document.getElementById("leader-box").classList.add("hide"); }
+  catch(e){
+    document.getElementById("leader-box").classList.add("hide");
+    document.getElementById("leader-order-box").classList.add("hide");
+  }
 })();
 </script>
 </body>
