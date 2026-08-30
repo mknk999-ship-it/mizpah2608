@@ -468,10 +468,11 @@ body{
     <nav class="menu-panel" id="menu-panel">
       <button class="menu-item" id="menu-rank">이번주 말씀랭킹</button>
       <button class="menu-item" id="menu-archive">지난 기록 보기</button>
+      <button class="menu-item" id="menu-medal-guide">메달 방식 안내</button>
       <button class="menu-item" id="menu-leader">인도자 순서 관리</button>
       <div class="menu-sep"></div>
       <button class="menu-item" id="menu-changelog">업데이트 내역</button>
-      <div class="menu-version">MIZPAH <b id="menu-version-num">v1.2</b></div>
+      <div class="menu-version">MIZPAH <b id="menu-version-num">v1.3</b></div>
     </nav>
   </div>
 
@@ -509,7 +510,7 @@ body{
 
     <div class="app-footer">
       <div class="app-footer-rule"></div>
-      <div class="version-tag">MIZPAH <b id="footer-version-num">v1.2</b></div>
+      <div class="version-tag">MIZPAH <b id="footer-version-num">v1.3</b></div>
       <button class="changelog-link" id="go-changelog">업데이트 내역 확인</button>
       <p class="footer-copy">말씀과 기도, 함께 쌓아가는 기록</p>
     </div>
@@ -566,6 +567,17 @@ body{
     <p class="sub">MIZPAH 체계 업데이트 기록입니다</p>
 
     <div class="changelog-list">
+      <div class="cl-entry">
+        <div class="cl-head"><span class="cl-ver">v1.3</span><span class="cl-date">2026.08</span></div>
+        <ul class="cl-items">
+          <li>메달 방식 안내 페이지 추가 — 실제 메달·다이아 아이콘으로 승급 과정 설명</li>
+          <li>메달 방식 안내를 메인 화면과 메뉴에서 바로 확인 가능</li>
+          <li>다이아몬드 뱃지를 개수 나열 대신 ◇×1 · ◇×2 · ◇×3 형태로 표시</li>
+          <li>메인 하단 버전 표시를 진한 검정으로 변경(메뉴 버전은 주황색 유지)</li>
+          <li>버전 아래 "업데이트 내역 확인" 링크 추가</li>
+          <li>이번 주 마감 초기화 실패 시 실제 오류 내용을 함께 표시</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-head"><span class="cl-ver">v1.2</span><span class="cl-date">2026.08</span></div>
         <ul class="cl-items">
@@ -1393,6 +1405,10 @@ document.getElementById("menu-rank").onclick = () => {
 document.getElementById("menu-archive").onclick = () => {
   closeMenu();
   openArchives(document.querySelector(".screen.on").id);
+};
+document.getElementById("menu-medal-guide").onclick = () => {
+  closeMenu();
+  openMedalGuide(document.querySelector(".screen.on").id);
 };
 document.getElementById("menu-leader").onclick = () => {
   closeMenu();
