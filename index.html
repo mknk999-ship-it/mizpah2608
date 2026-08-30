@@ -1254,10 +1254,11 @@ async function doReset(){
   }catch(e){
     document.getElementById("veil-ok").classList.remove("on");
     const msg = String(e && e.message || "");
+    console.error("mizpah_archive_reset failed:", msg);
     toast.innerHTML = '<div class="toast" style="color:#B85C3E">' +
       (msg.indexOf("already") >= 0 || msg.indexOf("duplicate") >= 0
         ? "같은 주차 기록이 이미 있어 저장하지 않았습니다"
-        : "초기화에 실패했습니다") + '</div>';
+        : "초기화에 실패했습니다" + (msg ? " · " + msg.slice(0, 140) : "")) + '</div>';
   }
   btn.disabled = false; btn.textContent = "마감하고 초기화";
 }
