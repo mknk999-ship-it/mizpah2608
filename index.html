@@ -187,6 +187,21 @@ body{
 .cl-items{list-style:none;display:flex;flex-direction:column;gap:7px}
 .cl-items li{font-size:12.5px;color:var(--ink);line-height:1.6;position:relative;padding-left:14px}
 .cl-items li::before{content:"·";position:absolute;left:0;color:var(--stone)}
+
+/* 메달 방식 안내 */
+#s-medal-guide{padding-top:10px}
+.mg-cards{display:flex;flex-direction:column;gap:14px;margin:24px 0 8px}
+.mg-card{
+  background:var(--paper-2);border:1px solid rgba(46,40,34,.08);border-radius:12px;
+  padding:20px 16px;text-align:center;
+}
+.mg-row{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:13px}
+.mg-dia-row{gap:10px}
+.mg-slot{display:flex;flex-direction:column;align-items:center;gap:6px}
+.mg-tag{font-size:10.5px;color:var(--ink-dim);letter-spacing:.04em}
+.mg-slot-group{display:flex;align-items:center;gap:5px}
+.mg-arrow{font-size:15px;color:var(--stone)}
+.mg-desc{font-size:12px;color:var(--ink-dim);line-height:1.65}
 .ghost:hover,.ghost:focus-visible{border-color:var(--clay);color:var(--clay)}
 .ghost:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
 
@@ -286,6 +301,8 @@ body{
 .dia{width:18px;height:18px;display:inline-block;flex:none;
   filter:drop-shadow(0 1px 2px rgba(80,120,160,.35))}
 .sep{width:1px;height:12px;background:rgba(46,40,34,.14);margin:0 2px;flex:none}
+.dia-badge{display:inline-flex;align-items:center;gap:3px}
+.dia-badge b{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ink)}
 
 .person{min-width:0}
 .person .nm{font-family:var(--display);font-size:17px;margin-bottom:7px}
@@ -472,6 +489,7 @@ body{
     <div class="names" id="names"></div>
     <button class="ghost gap" id="go-rank">이번주 말씀랭킹</button>
     <button class="ghost" id="go-arch-1">지난 기록 보기</button>
+    <button class="ghost" id="go-medal-guide">메달 방식 안내</button>
 
     <div class="section-divider"></div>
     <div class="leader hide" id="leader-box">
@@ -577,6 +595,62 @@ body{
     <button class="ghost gap" id="changelog-back">돌아가기</button>
   </section>
 
+  <section id="s-medal-guide" class="screen">
+    <p class="ask" style="font-size:19px;margin-bottom:4px">메달 방식 안내</p>
+    <p class="sub">매주 쌓은 메달은 이렇게 승급합니다</p>
+
+    <div class="mg-cards">
+      <div class="mg-card">
+        <div class="mg-row">
+          <div class="mg-slot"><i class="bdg b1"></i><span class="mg-tag">1등</span></div>
+          <div class="mg-slot"><i class="bdg b2"></i><span class="mg-tag">2등</span></div>
+          <div class="mg-slot"><i class="bdg b3"></i><span class="mg-tag">3등</span></div>
+        </div>
+        <p class="mg-desc">매주 마감할 때 1 · 2 · 3등에게 금 · 은 · 동메달이 하나씩 주어집니다</p>
+      </div>
+
+      <div class="mg-card">
+        <div class="mg-row">
+          <div class="mg-slot-group"><i class="bdg b3"></i><i class="bdg b3"></i><i class="bdg b3"></i></div>
+          <span class="mg-arrow">→</span>
+          <div class="mg-slot-group"><i class="bdg b2"></i></div>
+        </div>
+        <p class="mg-desc">동메달 3개를 모으면 은메달 1개로 승급합니다</p>
+      </div>
+
+      <div class="mg-card">
+        <div class="mg-row">
+          <div class="mg-slot-group"><i class="bdg b2"></i><i class="bdg b2"></i><i class="bdg b2"></i></div>
+          <span class="mg-arrow">→</span>
+          <div class="mg-slot-group"><i class="bdg b1"></i></div>
+        </div>
+        <p class="mg-desc">은메달 3개를 모으면 금메달 1개로 승급합니다</p>
+      </div>
+
+      <div class="mg-card">
+        <div class="mg-row">
+          <div class="mg-slot-group"><i class="bdg b1"></i><i class="bdg b1"></i><i class="bdg b1"></i></div>
+          <span class="mg-arrow">→</span>
+          <div class="mg-slot-group"><svg class="dia"><use href="#dia"/></svg></div>
+        </div>
+        <p class="mg-desc">금메달 3개를 모으면 다이아몬드 뱃지 1개로 승급합니다</p>
+      </div>
+
+      <div class="mg-card">
+        <div class="mg-row mg-dia-row">
+          <div class="dia-badge"><svg class="dia"><use href="#dia"/></svg><b>×1</b></div>
+          <span class="mg-arrow">→</span>
+          <div class="dia-badge"><svg class="dia"><use href="#dia"/></svg><b>×2</b></div>
+          <span class="mg-arrow">→</span>
+          <div class="dia-badge"><svg class="dia"><use href="#dia"/></svg><b>×3</b></div>
+        </div>
+        <p class="mg-desc">다이아몬드는 더 승급하지 않고, 모일 때마다 ◇×1 · ◇×2 · ◇×3 처럼 개수로 표시됩니다</p>
+      </div>
+    </div>
+
+    <button class="ghost gap" id="medal-guide-back">돌아가기</button>
+  </section>
+
 </div>
 
 <div class="veil" id="veil-pin">
@@ -625,6 +699,7 @@ let archives = [];
 let medals = {};
 let archFrom = "s-who";
 let clFrom = "s-who";
+let mgFrom = "s-who";
 let pin = "";
 let okPin = "";
 let pinPurpose = "reset"; // "reset" | "leader"
@@ -886,7 +961,7 @@ function badgeHTML(name){
   const d = Math.floor(g / 3); g = g % 3;   // 금 → 다이아
 
   let h = "";
-  for(let i = 0; i < d; i++) h += '<svg class="dia"><use href="#dia"/></svg>';
+  if(d > 0) h += '<span class="dia-badge"><svg class="dia"><use href="#dia"/></svg><b>×' + d + '</b></span>';
   let medalH = "";
   [["b1",g],["b2",s],["b3",b]].forEach(([cls,n]) => {
     for(let i = 0; i < n; i++) medalH += '<i class="bdg ' + cls + '"></i>';
@@ -924,7 +999,7 @@ function cumTotal(n){
 function show(id){
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("on"));
   document.getElementById(id).classList.add("on");
-  document.querySelector(".mark").classList.toggle("hide", id === "s-changelog");
+  document.querySelector(".mark").classList.toggle("hide", id === "s-changelog" || id === "s-medal-guide");
   window.scrollTo({top:0, behavior:"instant"});
 }
 
@@ -1071,6 +1146,11 @@ function reorder(jump, fromTotal){
 function openChangelog(from){
   clFrom = from;
   show("s-changelog");
+}
+
+function openMedalGuide(from){
+  mgFrom = from;
+  show("s-medal-guide");
 }
 
 /* ── 지난 기록 (마감된 모든 주를 최신순으로) ───── */
@@ -1284,6 +1364,8 @@ document.getElementById("arch-back").onclick = () => show(archFrom);
 document.getElementById("arch-one-back").onclick = () => show("s-archs");
 document.getElementById("go-changelog").onclick = () => openChangelog("s-who");
 document.getElementById("changelog-back").onclick = () => show(clFrom);
+document.getElementById("go-medal-guide").onclick = () => openMedalGuide("s-who");
+document.getElementById("medal-guide-back").onclick = () => show(mgFrom);
 
 /* ── 상단바 · 메뉴 ────────────────────────── */
 
