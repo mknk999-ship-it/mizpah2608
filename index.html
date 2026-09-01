@@ -988,13 +988,18 @@ function pointsOf(p){
   }
   return p.total || 0;
 }
+/* 점수가 같으면 장수(total)가 많은 쪽이 상위 */
 function rankList(records){
-  const list = (records || []).slice().sort((a,b) => pointsOf(b) - pointsOf(a));
-  let rank = 0, prev = null;
+  const list = (records || []).slice().sort((a,b) => {
+    const d = pointsOf(b) - pointsOf(a);
+    if(d !== 0) return d;
+    return (b.total || 0) - (a.total || 0);
+  });
+  let rank = 0, prevPts = null, prevTotal = null;
   return list.map((p, i) => {
-    const pts = pointsOf(p);
-    if(prev === null || pts !== prev){ rank = i + 1; prev = pts; }
-    return { name: p.name, total: p.total || 0, points: pts, rank: rank };
+    const pts = pointsOf(p), tot = p.total || 0;
+    if(prevPts === null || pts !== prevPts || tot !== prevTotal){ rank = i + 1; prevPts = pts; prevTotal = tot; }
+    return { name: p.name, total: tot, points: pts, rank: rank };
   });
 }
 function medalLine(records){
@@ -1045,13 +1050,18 @@ function badgeHTML(name){
 function anyMedals(){
   return NAMES.some(n => medals[n] && (medals[n].g || medals[n].s || medals[n].b));
 }
+/* 점수가 같으면 장수(total)가 많은 쪽이 상위 */
 function liveRanks(){
-  const sorted = NAMES.slice().sort((a,b) => scoreOf(b) - scoreOf(a));
+  const sorted = NAMES.slice().sort((a,b) => {
+    const d = scoreOf(b) - scoreOf(a);
+    if(d !== 0) return d;
+    return data[b].total - data[a].total;
+  });
   const map = {};
-  let rank = 0, prev = null;
+  let rank = 0, prevScore = null, prevTotal = null;
   sorted.forEach((n, i) => {
-    const t = scoreOf(n);
-    if(prev === null || t !== prev){ rank = i + 1; prev = t; }
+    const s = scoreOf(n), t = data[n].total;
+    if(prevScore === null || s !== prevScore || t !== prevTotal){ rank = i + 1; prevScore = s; prevTotal = t; }
     map[n] = rank;
   });
   return map;
@@ -1132,6 +1142,8 @@ function ranked(){
   return NAMES.slice().sort((a,b) => {
     const d = scoreOf(b) - scoreOf(a);
     if(d !== 0) return d;
+    const t = data[b].total - data[a].total;
+    if(t !== 0) return t;
     return (data[a].at || Infinity) - (data[b].at || Infinity);
   });
 }
