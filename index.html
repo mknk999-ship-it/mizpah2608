@@ -559,14 +559,14 @@ body{
       </button>
       <button class="method-opt" data-method="eye">
         <svg class="method-icon"><use href="#ic-eye"/></svg>
-        <span class="method-label">눈으로 보는 방식<br>×2점</span>
+        <span class="method-label">눈으로 보는 방식<br>×1.5점</span>
       </button>
       <button class="method-opt" data-method="hm">
         <span class="method-icon-group">
           <svg class="method-icon"><use href="#ic-pen"/></svg>
           <svg class="method-icon"><use href="#ic-speak"/></svg>
         </span>
-        <span class="method-label">손과 입 활용 방식<br>×3점</span>
+        <span class="method-label">손과 입 활용 방식<br>×2점</span>
       </button>
     </div>
     <div class="field">
@@ -775,11 +775,11 @@ function blank(){
   NAMES.forEach(n => o[n] = {total:0, ear:0, eye:0, hm:0, at:0});
   return o;
 }
-/* 배점: 귀=1점 눈=2점 손&입=3점. 랭킹은 이 점수 기준, 누적/돌무더기는 total(장수) 기준 */
+/* 배점: 귀=1점 눈=1.5점 손&입=2점. 랭킹은 이 점수 기준, 누적/돌무더기는 total(장수) 기준 */
 function scoreOf(n){
   const d = data[n];
   if(!d) return 0;
-  return (d.ear||0) + (d.eye||0)*2 + (d.hm||0)*3;
+  return (d.ear||0) + (d.eye||0)*1.5 + (d.hm||0)*2;
 }
 function note(msg){
   document.getElementById("mode-note").textContent = msg || "";
@@ -988,7 +988,7 @@ async function runLeaderShuffle(){
 /* 방식별 기록(ear/eye/hm)이 있는 주는 점수 기준, 없는 옛 기록은 total(장수) 기준 */
 function pointsOf(p){
   if(p.ear != null || p.eye != null || p.hm != null){
-    return (p.ear||0) + (p.eye||0)*2 + (p.hm||0)*3;
+    return (p.ear||0) + (p.eye||0)*1.5 + (p.hm||0)*2;
   }
   return p.total || 0;
 }
