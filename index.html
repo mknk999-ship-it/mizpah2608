@@ -217,6 +217,22 @@ body{
 .sofar{text-align:center;font-size:12px;color:var(--ink-dim);margin-bottom:30px;letter-spacing:.05em}
 .sofar b{font-family:var(--mono);font-weight:700;color:var(--stone);font-size:13px}
 
+.method-picker{display:flex;gap:8px;margin-bottom:20px}
+.method-opt{
+  flex:1;cursor:pointer;background:var(--paper-2);
+  border:1.5px solid rgba(46,40,34,.14);border-radius:10px;
+  padding:14px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;
+  transition:border-color .18s,background .18s;
+}
+.method-opt .method-icon{width:22px;height:22px;flex:none;color:var(--ink-dim);transition:color .18s}
+.method-opt .method-icon-group{display:flex;align-items:center;gap:4px}
+.method-opt .method-icon-group .method-icon{width:16px;height:16px}
+.method-opt .method-label{font-size:10.5px;color:var(--ink-dim);line-height:1.45;text-align:center;transition:color .18s}
+.method-opt:hover,.method-opt:focus-visible{border-color:rgba(217,119,87,.4)}
+.method-opt.active{border-color:var(--clay);background:var(--paper-3)}
+.method-opt.active .method-icon{color:var(--clay)}
+.method-opt.active .method-label{color:var(--ink)}
+
 .field{
   display:flex;align-items:center;gap:12px;
   background:var(--paper-2);border:1px solid rgba(46,40,34,.14);
@@ -318,6 +334,7 @@ body{
 
 .count{font-family:var(--mono);font-weight:700;font-size:20px;text-align:right}
 .count small{display:block;font-family:var(--body);font-weight:300;font-size:10px;color:var(--ink-dim);letter-spacing:.14em;margin-top:2px}
+.score-breakdown{font-family:var(--body);font-weight:300;font-size:9.5px;color:var(--ink-dim);letter-spacing:.01em;margin-top:4px;white-space:nowrap}
 
 .legend{text-align:center;font-size:11px;color:var(--ink-dim);letter-spacing:.08em;margin-top:22px}
 .toast{
@@ -449,6 +466,21 @@ body{
       <polygon points="13,3 17,7 10,7" fill="#B9D3E6"/>
       <polyline points="3,7 17,7" stroke="#fff" stroke-width=".6" opacity=".7"/>
     </symbol>
+    <symbol id="ic-ear" viewBox="0 0 24 24">
+      <path d="M9 13c-1-4 1-9 6-9a5.5 5.5 0 0 1 5.5 5.5c0 3.2-2.3 4.3-2.3 7a3.7 3.7 0 0 1-7.4 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M12 12.3a1.7 1.7 0 1 0 2 2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ic-eye" viewBox="0 0 24 24">
+      <path d="M2 12S6 5.5 12 5.5 22 12 22 12 18 18.5 12 18.5 2 12 2 12Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+      <circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    </symbol>
+    <symbol id="ic-pen" viewBox="0 0 24 24">
+      <path d="M4 20l1-4.5L15.5 5 19 8.5 8.5 19 4 20Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M13.5 6.5 17.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ic-speak" viewBox="0 0 24 24">
+      <path d="M4 5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-4 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+    </symbol>
   </defs>
 </svg>
 
@@ -520,6 +552,23 @@ body{
     <p class="who" id="who-name">—</p>
     <p class="sofar" id="who-sofar"></p>
     <p class="ask" style="font-size:17px;margin-bottom:20px">오늘 읽은 말씀 분량을 더해주세요</p>
+    <div class="method-picker" id="method-picker">
+      <button class="method-opt" data-method="ear">
+        <svg class="method-icon"><use href="#ic-ear"/></svg>
+        <span class="method-label">귀로 듣는 방식<br>×1점</span>
+      </button>
+      <button class="method-opt" data-method="eye">
+        <svg class="method-icon"><use href="#ic-eye"/></svg>
+        <span class="method-label">눈으로 보는 방식<br>×2점</span>
+      </button>
+      <button class="method-opt" data-method="hm">
+        <span class="method-icon-group">
+          <svg class="method-icon"><use href="#ic-pen"/></svg>
+          <svg class="method-icon"><use href="#ic-speak"/></svg>
+        </span>
+        <span class="method-label">손과 입 활용 방식<br>×3점</span>
+      </button>
+    </div>
     <div class="field">
       <div class="amount zero" id="amount">0</div>
       <span>장</span>
@@ -706,6 +755,7 @@ const MAX_ONCE = 200;
 let data = blank();
 let me = null;
 let amount = 0;
+let selectedMethod = null; // "ear" | "eye" | "hm"
 let lastEntry = null;
 let archives = [];
 let medals = {};
@@ -722,8 +772,14 @@ let wkExists = false;  // 같은 주차 기록이 이미 있는지
 
 function blank(){
   const o = {};
-  NAMES.forEach(n => o[n] = {total:0, at:0});
+  NAMES.forEach(n => o[n] = {total:0, ear:0, eye:0, hm:0, at:0});
   return o;
+}
+/* 배점: 귀=1점 눈=2점 손&입=3점. 랭킹은 이 점수 기준, 누적/돌무더기는 total(장수) 기준 */
+function scoreOf(n){
+  const d = data[n];
+  if(!d) return 0;
+  return (d.ear||0) + (d.eye||0)*2 + (d.hm||0)*3;
 }
 function note(msg){
   document.getElementById("mode-note").textContent = msg || "";
@@ -763,7 +819,7 @@ async function rpc(fn, body){
 
 async function load(){
   const r = await fetch(
-    SUPA_URL + "/rest/v1/mizpah_readers?select=name,total,updated_at",
+    SUPA_URL + "/rest/v1/mizpah_readers?select=name,total,ear,eye,hm,updated_at",
     { headers: H, cache: "no-store" }
   );
   if(!r.ok) throw new Error(await r.text());
@@ -772,6 +828,7 @@ async function load(){
   rows.forEach(row => {
     if(next[row.name]) next[row.name] = {
       total: row.total || 0,
+      ear: row.ear || 0, eye: row.eye || 0, hm: row.hm || 0,
       at: row.updated_at ? Date.parse(row.updated_at) : 0
     };
   });
@@ -779,8 +836,8 @@ async function load(){
   note("");
   buildNames();
 }
-async function addChapters(name, amt){
-  await rpc("add_chapters", { p_name: name, p_amount: amt });
+async function addChapters(name, amt, method){
+  await rpc("add_chapters", { p_name: name, p_amount: amt, p_method: method });
 }
 async function loadArchives(){
   const r = await fetch(
@@ -928,13 +985,20 @@ async function runLeaderShuffle(){
 
 /* ── 순위 · 메달 (동점은 공동 순위) ─────────── */
 
+/* 방식별 기록(ear/eye/hm)이 있는 주는 점수 기준, 없는 옛 기록은 total(장수) 기준 */
+function pointsOf(p){
+  if(p.ear != null || p.eye != null || p.hm != null){
+    return (p.ear||0) + (p.eye||0)*2 + (p.hm||0)*3;
+  }
+  return p.total || 0;
+}
 function rankList(records){
-  const list = (records || []).slice().sort((a,b) => (b.total||0) - (a.total||0));
+  const list = (records || []).slice().sort((a,b) => pointsOf(b) - pointsOf(a));
   let rank = 0, prev = null;
   return list.map((p, i) => {
-    const t = p.total || 0;
-    if(prev === null || t !== prev){ rank = i + 1; prev = t; }
-    return { name: p.name, total: t, rank: rank };
+    const pts = pointsOf(p);
+    if(prev === null || pts !== prev){ rank = i + 1; prev = pts; }
+    return { name: p.name, total: p.total || 0, points: pts, rank: rank };
   });
 }
 function medalLine(records){
@@ -986,11 +1050,11 @@ function anyMedals(){
   return NAMES.some(n => medals[n] && (medals[n].g || medals[n].s || medals[n].b));
 }
 function liveRanks(){
-  const sorted = NAMES.slice().sort((a,b) => data[b].total - data[a].total);
+  const sorted = NAMES.slice().sort((a,b) => scoreOf(b) - scoreOf(a));
   const map = {};
   let rank = 0, prev = null;
   sorted.forEach((n, i) => {
-    const t = data[n].total;
+    const t = scoreOf(n);
     if(prev === null || t !== prev){ rank = i + 1; prev = t; }
     map[n] = rank;
   });
@@ -1039,13 +1103,26 @@ function setAmount(v){
   el.classList.toggle("zero", amount === 0);
   el.classList.add("bump");
   setTimeout(() => el.classList.remove("bump"), 180);
-  document.getElementById("save").disabled = amount < 1;
+  updateSaveEnabled();
+}
+
+function setMethod(m){
+  selectedMethod = m;
+  document.querySelectorAll(".method-opt").forEach(b => {
+    b.classList.toggle("active", b.dataset.method === m);
+  });
+  updateSaveEnabled();
+}
+
+function updateSaveEnabled(){
+  document.getElementById("save").disabled = !(amount >= 1 && selectedMethod);
 }
 
 async function openAdd(){
   document.getElementById("who-name").textContent = me;
   document.getElementById("who-sofar").textContent = "불러오는 중…";
   document.getElementById("err").textContent = "";
+  setMethod(null);
   setAmount(0);
   show("s-add");
   try{ await load(); }catch(e){ note("기록을 불러오지 못했습니다 · 연결을 확인해 주세요"); }
@@ -1057,7 +1134,7 @@ async function openAdd(){
 
 function ranked(){
   return NAMES.slice().sort((a,b) => {
-    const d = data[b].total - data[a].total;
+    const d = scoreOf(b) - scoreOf(a);
     if(d !== 0) return d;
     return (data[a].at || Infinity) - (data[b].at || Infinity);
   });
@@ -1073,6 +1150,7 @@ function drawBoard(animateFor, jump){
 
   order.forEach(n => {
     const total = data[n].total;
+    const score = scoreOf(n);
     const rk = ranks[n];
     const isTop = rk <= 3 && total > 0;
     const row = document.createElement("div");
@@ -1095,11 +1173,15 @@ function drawBoard(animateFor, jump){
     const rise = (jump && jump.name === n && jump.delta > 0)
       ? '<span class="up">&#9650; ' + jump.delta + '</span>' : "";
 
+    const breakdown = score > 0
+      ? '<div class="score-breakdown">귀 ' + data[n].ear + ' · 눈 ' + data[n].eye + ' · 손&입 ' + data[n].hm + '</div>'
+      : "";
+
     row.innerHTML = badge +
       '<div class="person"><div class="nm">' + n + badgeHTML(n) + rise + '</div>' +
       (total > 0 ? '<div class="pile">' + pile + '</div>'
                  : '<div class="empty">첫 돌을 기다리는 중</div>') +
-      '</div><div class="count">' + total + '<small>장</small></div>';
+      '</div><div class="count">' + score + '<small>점</small>' + breakdown + '</div>';
     board.appendChild(row);
   });
 
@@ -1125,7 +1207,7 @@ function countUp(el, from, to){
   requestAnimationFrame(step);
 }
 
-function reorder(jump, fromTotal){
+function reorder(jump, fromScore){
   const before = rowTops();
   drawBoard(jump.name, jump);
   const after = rowTops();
@@ -1150,7 +1232,7 @@ function reorder(jump, fromTotal){
   });
 
   const mine = document.querySelector('#board .row[data-name="' + jump.name + '"] .count');
-  if(mine) countUp(mine, fromTotal, data[jump.name].total);
+  if(mine) countUp(mine, fromScore, scoreOf(jump.name));
 }
 
 /* ── 업데이트 내역 ─────────────────────────── */
@@ -1437,20 +1519,27 @@ document.querySelectorAll(".quick button").forEach(b => {
   b.onclick = () => setAmount(amount + parseInt(b.dataset.add, 10));
 });
 document.getElementById("clear-amt").onclick = () => setAmount(0);
+document.querySelectorAll(".method-opt").forEach(b => {
+  b.onclick = () => setMethod(b.dataset.method);
+});
+
+const METHOD_LABEL = { ear: "귀로 듣는", eye: "눈으로 보는", hm: "손과 입을 활용한" };
 
 document.getElementById("save").onclick = async () => {
   const err = document.getElementById("err");
   const btn = document.getElementById("save");
   const v = amount;
+  const method = selectedMethod;
 
+  if(!method){ err.textContent = "읽은 방식을 먼저 골라주세요"; return; }
   if(v < 1){ err.textContent = "버튼을 눌러 1장 이상 더해주세요"; return; }
 
   btn.disabled = true; btn.textContent = "쌓는 중…"; err.textContent = "";
   try{
-    await addChapters(me, v);
-    lastEntry = { name: me, amount: v };
+    await addChapters(me, v, method);
+    lastEntry = { name: me, amount: v, method: method };
 
-    const wasTotal = data[me].total;
+    const wasScore = scoreOf(me);
     const wasRank  = ranked().indexOf(me);
 
     document.getElementById("toast").innerHTML = "";
@@ -1461,12 +1550,13 @@ document.getElementById("save").onclick = async () => {
     const nowRank = ranked().indexOf(me);
 
     setTimeout(() => {
-      reorder({ name: me, delta: wasRank - nowRank }, wasTotal);
+      reorder({ name: me, delta: wasRank - nowRank }, wasScore);
       document.getElementById("toast").innerHTML =
-        '<div class="toast">' + me + ' · ' + v + '장을 쌓았습니다 &nbsp;<button id="undo">되돌리기</button></div>';
+        '<div class="toast">' + me + ' · ' + METHOD_LABEL[method] + ' 방식으로 ' + v + '장을 쌓았습니다 &nbsp;<button id="undo">되돌리기</button></div>';
       document.getElementById("undo").onclick = undo;
     }, 550);
     setAmount(0);
+    setMethod(null);
   }catch(e){
     err.textContent = "기록에 실패했습니다 · 잠시 후 다시 눌러주세요";
   }
@@ -1478,7 +1568,7 @@ async function undo(){
   const t = document.getElementById("toast");
   t.innerHTML = '<div class="toast">되돌리는 중…</div>';
   try{
-    await addChapters(lastEntry.name, -lastEntry.amount);
+    await addChapters(lastEntry.name, -lastEntry.amount, lastEntry.method);
     lastEntry = null;
     await load();
     drawBoard();
