@@ -225,8 +225,6 @@ body{
   transition:border-color .18s,background .18s;
 }
 .method-opt .method-icon{width:22px;height:22px;flex:none;color:var(--ink-dim);transition:color .18s}
-.method-opt .method-icon-group{display:flex;align-items:center;gap:4px}
-.method-opt .method-icon-group .method-icon{width:16px;height:16px}
 .method-opt .method-label{font-size:10.5px;color:var(--ink-dim);line-height:1.45;text-align:center;transition:color .18s}
 .method-opt:hover,.method-opt:focus-visible{border-color:rgba(217,119,87,.4)}
 .method-opt.active{border-color:var(--clay);background:var(--paper-3)}
@@ -338,8 +336,6 @@ body{
 .score-breakdown{display:flex;justify-content:flex-end;align-items:center;gap:7px;margin-top:5px}
 .bd-item{display:inline-flex;align-items:center;gap:2px;font-family:var(--mono);font-size:10.5px;color:var(--ink-dim)}
 .bd-icon{width:11px;height:11px;flex:none;color:var(--stone)}
-.bd-pair{display:inline-flex;align-items:center;gap:1px}
-.bd-pair .bd-icon{width:9px;height:9px}
 
 .legend{text-align:center;font-size:11px;color:var(--ink-dim);letter-spacing:.08em;margin-top:22px}
 .toast{
@@ -472,8 +468,9 @@ body{
       <polyline points="3,7 17,7" stroke="#fff" stroke-width=".6" opacity=".7"/>
     </symbol>
     <symbol id="ic-ear" viewBox="0 0 24 24">
-      <path d="M9 13c-1-4 1-9 6-9a5.5 5.5 0 0 1 5.5 5.5c0 3.2-2.3 4.3-2.3 7a3.7 3.7 0 0 1-7.4 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M12 12.3a1.7 1.7 0 1 0 2 2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M4 13v-1a8 8 0 0 1 16 0v1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      <rect x="3" y="13" width="4.4" height="6.5" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.6"/>
+      <rect x="16.6" y="13" width="4.4" height="6.5" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.6"/>
     </symbol>
     <symbol id="ic-eye" viewBox="0 0 24 24">
       <path d="M2 12S6 5.5 12 5.5 22 12 22 12 18 18.5 12 18.5 2 12 2 12Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
@@ -482,9 +479,6 @@ body{
     <symbol id="ic-pen" viewBox="0 0 24 24">
       <path d="M4 20l1-4.5L15.5 5 19 8.5 8.5 19 4 20Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
       <path d="M13.5 6.5 17.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    </symbol>
-    <symbol id="ic-speak" viewBox="0 0 24 24">
-      <path d="M4 5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-4 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
     </symbol>
   </defs>
 </svg>
@@ -567,10 +561,7 @@ body{
         <span class="method-label">눈으로 보는 방식<br>×1.5점</span>
       </button>
       <button class="method-opt" data-method="hm">
-        <span class="method-icon-group">
-          <svg class="method-icon"><use href="#ic-pen"/></svg>
-          <svg class="method-icon"><use href="#ic-speak"/></svg>
-        </span>
+        <svg class="method-icon"><use href="#ic-pen"/></svg>
         <span class="method-label">손과 입 활용 방식<br>×2점</span>
       </button>
     </div>
@@ -1182,7 +1173,7 @@ function drawBoard(animateFor, jump){
       ? '<div class="score-breakdown">' +
           '<span class="bd-item"><svg class="bd-icon"><use href="#ic-ear"/></svg>' + data[n].ear + '</span>' +
           '<span class="bd-item"><svg class="bd-icon"><use href="#ic-eye"/></svg>' + data[n].eye + '</span>' +
-          '<span class="bd-item"><span class="bd-pair"><svg class="bd-icon"><use href="#ic-pen"/></svg><svg class="bd-icon"><use href="#ic-speak"/></svg></span>' + data[n].hm + '</span>' +
+          '<span class="bd-item"><svg class="bd-icon"><use href="#ic-pen"/></svg>' + data[n].hm + '</span>' +
         '</div>'
       : "";
 
