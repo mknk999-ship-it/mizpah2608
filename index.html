@@ -335,7 +335,11 @@ body{
 .count{font-family:var(--mono);font-weight:700;font-size:20px;text-align:right}
 .count small{display:block;font-family:var(--body);font-weight:300;font-size:10px;color:var(--ink-dim);letter-spacing:.14em;margin-top:2px}
 .count .pt{font-family:var(--body);font-weight:300;font-size:12px;color:var(--ink-dim);letter-spacing:.04em;margin-left:2px}
-.score-breakdown{font-family:var(--body);font-weight:300;font-size:9.5px;color:var(--ink-dim);letter-spacing:.01em;margin-top:4px;white-space:nowrap}
+.score-breakdown{display:flex;justify-content:flex-end;align-items:center;gap:7px;margin-top:5px}
+.bd-item{display:inline-flex;align-items:center;gap:2px;font-family:var(--mono);font-size:10.5px;color:var(--ink-dim)}
+.bd-icon{width:11px;height:11px;flex:none;color:var(--stone)}
+.bd-pair{display:inline-flex;align-items:center;gap:1px}
+.bd-pair .bd-icon{width:9px;height:9px}
 
 .legend{text-align:center;font-size:11px;color:var(--ink-dim);letter-spacing:.08em;margin-top:22px}
 .toast{
@@ -1175,7 +1179,11 @@ function drawBoard(animateFor, jump){
       ? '<span class="up">&#9650; ' + jump.delta + '</span>' : "";
 
     const breakdown = score > 0
-      ? '<div class="score-breakdown">귀 ' + data[n].ear + ' · 눈 ' + data[n].eye + ' · 손&입 ' + data[n].hm + '</div>'
+      ? '<div class="score-breakdown">' +
+          '<span class="bd-item"><svg class="bd-icon"><use href="#ic-ear"/></svg>' + data[n].ear + '</span>' +
+          '<span class="bd-item"><svg class="bd-icon"><use href="#ic-eye"/></svg>' + data[n].eye + '</span>' +
+          '<span class="bd-item"><span class="bd-pair"><svg class="bd-icon"><use href="#ic-pen"/></svg><svg class="bd-icon"><use href="#ic-speak"/></svg></span>' + data[n].hm + '</span>' +
+        '</div>'
       : "";
 
     row.innerHTML = badge +
