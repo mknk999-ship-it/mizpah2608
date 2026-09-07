@@ -139,6 +139,15 @@ body{
 .name .badges{margin-left:0;flex-wrap:wrap;justify-content:center;min-height:18px}
 .name .total{font-family:var(--mono);font-weight:400;font-size:11.5px;color:var(--ink-dim);letter-spacing:.04em}
 .name .total b{font-weight:700;color:var(--ink);font-size:13px}
+.name.is-leader{
+  border-color:#C9A03F;
+  box-shadow:0 0 0 1.5px rgba(201,160,63,.55), 0 4px 10px rgba(201,160,63,.16);
+}
+.name.is-leader:hover,.name.is-leader:focus-visible{border-color:#C9A03F}
+.name-tag{
+  position:absolute;top:8px;left:10px;
+  font-size:9px;font-weight:700;letter-spacing:.05em;color:#8A6819;
+}
 
 .ghost{
   display:block;width:100%;margin-top:12px;cursor:pointer;
@@ -877,6 +886,12 @@ async function updateLeader(patch){
   });
   if(!r.ok) throw new Error(await r.text());
 }
+function currentLeaderName(){
+  if(!leaderData || !leaderData.names || !leaderData.names.length) return null;
+  const names = leaderData.names;
+  const idx = ((leaderData.current_idx % names.length) + names.length) % names.length;
+  return names[idx];
+}
 function renderLeader(){
   const box = document.getElementById("leader-box");
   const orderBox = document.getElementById("leader-order-box");
@@ -892,6 +907,7 @@ function renderLeader(){
   ).join('<span class="arrow"> &rarr; </span>');
   document.getElementById("leader-next").innerHTML =
     "다음 주 인도자 · <b>" + next + "</b>";
+  buildNames();
 }
 function popSeal(){
   const seal = document.getElementById("leader-seal");
@@ -1089,10 +1105,14 @@ function buildNames(){
   const box = document.getElementById("names");
   box.innerHTML = "";
   const showRow = anyMedals();
+  const leaderName = currentLeaderName();
   NAMES.forEach(n => {
+    const isLeader = n === leaderName;
     const b = document.createElement("button");
-    b.className = "name";
-    b.innerHTML = '<span>' + n + '</span>' +
+    b.className = "name" + (isLeader ? " is-leader" : "");
+    b.innerHTML =
+      (isLeader ? '<span class="name-tag">인도자</span>' : "") +
+      '<span>' + n + '</span>' +
       '<span class="total">누적 <b>' + cumTotal(n) + '</b>장</span>' +
       (showRow ? (badgeHTML(n) || '<span class="badges"></span>') : "");
     b.onclick = () => { me = n; openAdd(); };
