@@ -1107,7 +1107,7 @@ function buildNames(){
   const showRow = anyMedals();
   const leaderName = currentLeaderName();
   NAMES.forEach(n => {
-    const isLeader = n === leaderName;
+    const isLeader = !!leaderName && (n === leaderName || n.endsWith(leaderName));
     const b = document.createElement("button");
     b.className = "name" + (isLeader ? " is-leader" : "");
     b.innerHTML =
