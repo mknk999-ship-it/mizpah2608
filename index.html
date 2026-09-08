@@ -611,15 +611,15 @@ body{
     <div class="method-picker" id="method-picker">
       <button class="method-opt" data-method="ear">
         <svg class="method-icon"><use href="#ic-ear"/></svg>
-        <span class="method-label">귀로 듣는 방식<br>×1점</span>
+        <span class="method-label">귀로 듣는 방식<br>1점</span>
       </button>
       <button class="method-opt" data-method="eye">
         <svg class="method-icon"><use href="#ic-eye"/></svg>
-        <span class="method-label">눈으로 보는 방식<br>×1.5점</span>
+        <span class="method-label">눈으로 보는 방식<br>1.5점</span>
       </button>
       <button class="method-opt" data-method="hm">
         <svg class="method-icon"><use href="#ic-pen"/></svg>
-        <span class="method-label">손과 입 활용 방식<br>×2점</span>
+        <span class="method-label">손과 입 활용 방식<br>2점</span>
       </button>
     </div>
     <div class="field">
@@ -646,15 +646,15 @@ body{
     <div class="method-picker pray-picker" id="pray-picker">
       <button class="method-opt" data-item="dawn" id="pray-dawn-btn">
         <svg class="method-icon"><use href="#ic-sunrise"/></svg>
-        <span class="method-label">새벽예배 참석<br>×20점</span>
+        <span class="method-label">새벽예배 참석<br><span id="pray-dawn-pts">20</span>점</span>
       </button>
       <button class="method-opt" data-item="min">
         <svg class="method-icon"><use href="#ic-clock"/></svg>
-        <span class="method-label">기도 1분 이상<br>×4점</span>
+        <span class="method-label">기도 1분 이상<br>4점</span>
       </button>
       <button class="method-opt" data-item="letter">
         <svg class="method-icon"><use href="#ic-pen"/></svg>
-        <span class="method-label">자필 기도문 편지<br>×10점</span>
+        <span class="method-label">자필 기도문 편지<br>10점</span>
       </button>
     </div>
     <p class="pray-dawn-note hide" id="pray-dawn-note">새벽예배는 하루에 한 번만 기록할 수 있어요 · 자정에 초기화됩니다</p>
@@ -839,6 +839,10 @@ const H = {
 const NAMES = ["이명세훈","김민정","유은지","유재은","박원준","유영우"];
 const MAX_STONES = 26;
 const MAX_ONCE = 200;
+const DAWN_POINTS_OVERRIDE = { "유재은": 10 };
+function dawnPointsFor(n){
+  return DAWN_POINTS_OVERRIDE[n] || 20;
+}
 
 let data = blank();
 let me = null;
@@ -876,7 +880,7 @@ function readScoreOf(n){
 function prayScoreOf(n){
   const d = data[n];
   if(!d) return 0;
-  return (d.pray_dawn||0)*20 + (d.pray_min||0)*4 + (d.pray_letter||0)*10;
+  return (d.pray_dawn||0)*dawnPointsFor(n) + (d.pray_min||0)*4 + (d.pray_letter||0)*10;
 }
 function scoreOf(n){
   return readScoreOf(n) + prayScoreOf(n);
@@ -1106,7 +1110,7 @@ async function runLeaderShuffle(){
 function pointsOf(p){
   if(p.ear != null || p.eye != null || p.hm != null || p.pray_dawn != null || p.pray_min != null || p.pray_letter != null){
     return (p.ear||0) + (p.eye||0)*1.5 + (p.hm||0)*2 +
-           (p.pray_dawn||0)*20 + (p.pray_min||0)*4 + (p.pray_letter||0)*10;
+           (p.pray_dawn||0)*dawnPointsFor(p.name) + (p.pray_min||0)*4 + (p.pray_letter||0)*10;
   }
   return p.total || 0;
 }
@@ -1261,6 +1265,7 @@ let selectedPrayItems = new Set();
 
 function updatePrayUI(){
   const dawnDone = isDawnDoneToday(me);
+  document.getElementById("pray-dawn-pts").textContent = dawnPointsFor(me);
   document.querySelectorAll("#pray-picker .method-opt").forEach(b => {
     const item = b.dataset.item;
     const isDawn = item === "dawn";
