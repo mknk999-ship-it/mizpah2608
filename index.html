@@ -346,25 +346,15 @@ body{
 
 .person{min-width:0}
 .person .nm{font-family:var(--display);font-size:17px;margin-bottom:7px}
-.pile{display:flex;flex-wrap:wrap;gap:2.5px;max-width:100%}
-.stone{
-  width:8px;height:7px;border-radius:50% 50% 44% 44%;
-  background:var(--stone);opacity:.85;
-}
-.row.top .stone{background:var(--clay);opacity:.8}
-.stone.drop{animation:drop .38s cubic-bezier(.3,1.4,.5,1) both}
-@keyframes drop{from{opacity:0;transform:translateY(-9px) scale(.5)}to{opacity:.85;transform:none}}
 .empty{font-size:11.5px;color:var(--ink-dim);letter-spacing:.05em}
 
 .count{font-family:var(--mono);font-weight:700;font-size:20px;text-align:right}
-.count small{display:block;font-family:var(--body);font-weight:300;font-size:10px;color:var(--ink-dim);letter-spacing:.14em;margin-top:2px}
 .count .pt{font-family:var(--body);font-weight:300;font-size:12px;color:var(--ink-dim);letter-spacing:.04em;margin-left:2px}
 .score-breakdown{display:flex;flex-direction:column;align-items:flex-end;gap:3px;margin-top:5px}
 .bd-row{display:flex;justify-content:flex-end;align-items:center;gap:7px}
 .bd-item{display:inline-flex;align-items:center;gap:2px;font-family:var(--mono);font-size:10.5px;color:var(--ink-dim)}
 .bd-icon{width:11px;height:11px;flex:none;color:var(--stone)}
 
-.legend{text-align:center;font-size:11px;color:var(--ink-dim);letter-spacing:.08em;margin-top:22px}
 .toast{
   margin-top:14px;text-align:center;font-size:12px;color:var(--moss);
   animation:rise .4s both;
@@ -540,7 +530,7 @@ body{
 
   <div class="menu-overlay" id="menu-overlay">
     <nav class="menu-panel" id="menu-panel">
-      <button class="menu-item" id="menu-rank">이번주 말씀랭킹</button>
+      <button class="menu-item" id="menu-rank">이번주 점수랭킹</button>
       <button class="menu-item" id="menu-archive">지난 기록 보기</button>
       <button class="menu-item" id="menu-medal-guide">메달 방식 안내</button>
       <button class="menu-item" id="menu-leader">인도자 순서 관리</button>
@@ -562,7 +552,7 @@ body{
     <p class="sub">이름을 고르면 그 이름으로 기록됩니다</p>
 
     <div class="names" id="names"></div>
-    <button class="ghost gap" id="go-rank">이번주 말씀랭킹</button>
+    <button class="ghost gap" id="go-rank">이번주 점수랭킹</button>
     <button class="ghost" id="go-arch-1">지난 기록 보기</button>
     <button class="ghost" id="go-medal-guide">메달 방식 안내</button>
 
@@ -667,8 +657,7 @@ body{
 
   <section id="s-rank" class="screen">
     <p class="ask" style="font-size:19px;margin-bottom:22px">이번주 말씀읽기 점수</p>
-    <div id="board"><p class="loading">돌무더기를 세는 중…</p></div>
-    <p class="legend" id="legend"></p>
+    <div id="board"><p class="loading">점수를 세는 중…</p></div>
     <div id="toast"></div>
     <button class="ghost gap" id="back-who-2">처음으로 돌아가기</button>
     <button class="ghost" id="go-arch-2">지난 기록 보기</button>
@@ -677,7 +666,7 @@ body{
 
   <section id="s-archs" class="screen">
     <p class="ask" style="font-size:19px">지난 기록</p>
-    <p class="sub">마감된 주간의 돌무더기입니다</p>
+    <p class="sub">마감된 주간의 기록입니다</p>
     <div id="arch-list"><p class="loading">기록을 찾는 중…</p></div>
     <button class="ghost gap" id="arch-back">돌아가기</button>
   </section>
@@ -686,7 +675,6 @@ body{
     <p class="ask" id="arch-title" style="font-size:19px;margin-bottom:6px">—</p>
     <p class="sub" id="arch-sub"></p>
     <div id="arch-board"></div>
-    <p class="legend" id="arch-legend"></p>
     <button class="ghost gap" id="arch-one-back">목록으로</button>
   </section>
 
@@ -839,7 +827,6 @@ const H = {
 };
 
 const NAMES = ["이명세훈","김민정","유은지","유재은","박원준","유영우"];
-const MAX_STONES = 26;
 const MAX_ONCE = 200;
 const DAWN_POINTS_OVERRIDE = { "유재은": 10 };
 function dawnPointsFor(n){
@@ -873,7 +860,7 @@ function blank(){
   });
   return o;
 }
-/* 배점: 귀=1점 눈=1.5점 손&입=2점, 새벽예배=20점 기도1분=4점 편지=10점. 랭킹은 이 점수 기준, 누적/돌무더기는 total(장수) 기준 */
+/* 배점: 귀=1점 눈=1.5점 손&입=2점, 새벽예배=20점(사람별 다를 수 있음) 기도1분=4점 편지=10점. 랭킹은 이 점수 기준, 누적은 total(장수) 기준 */
 function readScoreOf(n){
   const d = data[n];
   if(!d) return 0;
@@ -1133,7 +1120,7 @@ function rankList(records){
 function medalLine(records){
   const groups = {1:[],2:[],3:[]};
   rankList(records).forEach(p => {
-    if(p.total > 0 && groups[p.rank]) groups[p.rank].push(p.name);
+    if(p.points > 0 && groups[p.rank]) groups[p.rank].push(p.name);
   });
   const segs = [];
   [[1,"b1"],[2,"b2"],[3,"b3"]].forEach(([rank,cls]) => {
@@ -1150,7 +1137,7 @@ function tallyMedals(){
   const keys = ["g","s","b"];
   archives.forEach(a => {
     rankList(a.records).forEach(p => {
-      if(p.total > 0 && p.rank <= 3 && t[p.name]) t[p.name][keys[p.rank - 1]]++;
+      if(p.points > 0 && p.rank <= 3 && t[p.name]) t[p.name][keys[p.rank - 1]]++;
     });
   });
   medals = t;
@@ -1325,16 +1312,13 @@ function ranked(){
 function drawBoard(animateFor, jump){
   const order = ranked();
   const ranks = liveRanks();
-  const max = Math.max(...order.map(n => data[n].total), 1);
-  const unit = Math.max(1, Math.ceil(max / MAX_STONES));
   const board = document.getElementById("board");
   board.innerHTML = "";
 
   order.forEach(n => {
-    const total = data[n].total;
     const score = scoreOf(n);
     const rk = ranks[n];
-    const isTop = rk <= 3 && total > 0;
+    const isTop = rk <= 3 && score > 0;
     const row = document.createElement("div");
     row.className = "row" + (isTop ? " top" : "") + (n === me ? " me" : "");
     row.dataset.name = n;
@@ -1342,15 +1326,6 @@ function drawBoard(animateFor, jump){
     const badge = isTop
       ? '<div class="medal m' + rk + '">' + rk + '</div>'
       : '<div class="rank-n">' + rk + '</div>';
-
-    const count = total > 0 ? Math.max(1, Math.round(total / unit)) : 0;
-    const fresh = animateFor === n ? Math.round((lastEntry ? lastEntry.amount : 0) / unit) : 0;
-    let pile = "";
-    for(let s = 0; s < count; s++){
-      const isNew = s >= count - fresh;
-      pile += '<i class="stone' + (isNew ? " drop" : "") +
-              '" style="animation-delay:' + (isNew ? s*40 : 0) + 'ms"></i>';
-    }
 
     const rise = (jump && jump.name === n && jump.delta > 0)
       ? '<span class="up">&#9650; ' + jump.delta + '</span>' : "";
@@ -1375,13 +1350,10 @@ function drawBoard(animateFor, jump){
 
     row.innerHTML = badge +
       '<div class="person"><div class="nm">' + n + badgeHTML(n) + rise + '</div>' +
-      (total > 0 ? '<div class="pile">' + pile + '</div>'
-                 : '<div class="empty">첫 돌을 기다리는 중</div>') +
+      (score === 0 ? '<div class="empty">아직 기록이 없습니다</div>' : "") +
       '</div><div class="count">' + score + '<span class="pt">점</span>' + breakdown + '</div>';
     board.appendChild(row);
   });
-
-  document.getElementById("legend").textContent = "돌 하나 = " + unit + "장";
 }
 
 function rowTops(){
@@ -1499,13 +1471,11 @@ function openArchive(key){
 
 function drawArchive(records){
   const list = rankList(records);
-  const max = Math.max(...list.map(x => x.total), 1);
-  const unit = Math.max(1, Math.ceil(max / MAX_STONES));
   const board = document.getElementById("arch-board");
   board.innerHTML = "";
 
   list.forEach(p => {
-    const isTop = p.rank <= 3 && p.total > 0;
+    const isTop = p.rank <= 3 && p.points > 0;
     const row = document.createElement("div");
     row.className = "row" + (isTop ? " top" : "");
 
@@ -1513,19 +1483,12 @@ function drawArchive(records){
       ? '<div class="medal m' + p.rank + '">' + p.rank + '</div>'
       : '<div class="rank-n">' + p.rank + '</div>';
 
-    const count = p.total > 0 ? Math.max(1, Math.round(p.total / unit)) : 0;
-    let pile = "";
-    for(let s = 0; s < count; s++) pile += '<i class="stone"></i>';
-
     row.innerHTML = badge +
       '<div class="person"><div class="nm">' + p.name + '</div>' +
-      (p.total > 0 ? '<div class="pile">' + pile + '</div>'
-                   : '<div class="empty">쌓은 돌이 없습니다</div>') +
-      '</div><div class="count">' + p.total + '<small>장</small></div>';
+      (p.points === 0 ? '<div class="empty">아직 기록이 없습니다</div>' : "") +
+      '</div><div class="count">' + p.points + '<span class="pt">점</span></div>';
     board.appendChild(row);
   });
-
-  document.getElementById("arch-legend").textContent = "돌 하나 = " + unit + "장";
 }
 
 /* ── 비밀번호 패드 & 초기화 ───────────────── */
@@ -1639,7 +1602,7 @@ async function doReset(){
 document.getElementById("go-rank").onclick = async () => {
   show("s-rank");
   document.getElementById("toast").innerHTML = "";
-  document.getElementById("board").innerHTML = '<p class="loading">돌무더기를 세는 중…</p>';
+  document.getElementById("board").innerHTML = '<p class="loading">점수를 세는 중…</p>';
   try{ await load(); }
   catch(e){ note("기록을 불러오지 못했습니다 · 연결을 확인해 주세요"); }
   drawBoard();
