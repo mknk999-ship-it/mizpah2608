@@ -1244,7 +1244,8 @@ function countUp(el, from, to){
   function step(t){
     const k = Math.min(1, (t - t0) / dur);
     const e = 1 - Math.pow(1 - k, 3);
-    el.firstChild.nodeValue = String(Math.round(from + (to - from) * e));
+    const v = k < 1 ? Math.round((from + (to - from) * e) * 10) / 10 : to;
+    el.firstChild.nodeValue = String(v);
     if(k < 1) requestAnimationFrame(step);
   }
   requestAnimationFrame(step);
