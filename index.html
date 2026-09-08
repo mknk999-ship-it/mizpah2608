@@ -239,6 +239,23 @@ body{
 .method-opt.active{border-color:var(--clay);background:var(--paper-3)}
 .method-opt.active .method-icon{color:var(--clay)}
 .method-opt.active .method-label{color:var(--ink)}
+.method-opt.opt-disabled{cursor:default;opacity:.45}
+.method-opt.opt-disabled:hover{border-color:rgba(46,40,34,.14)}
+
+.choose-grid{display:flex;gap:12px;margin-bottom:22px}
+.choose-opt{
+  flex:1;cursor:pointer;background:var(--paper-2);
+  border:1.5px solid rgba(46,40,34,.14);border-radius:12px;
+  padding:28px 10px;display:flex;flex-direction:column;align-items:center;gap:12px;
+  font-family:var(--display);font-size:16px;color:var(--ink);
+  transition:border-color .18s,background .18s,transform .18s;
+}
+.choose-opt .choose-icon{width:30px;height:30px;flex:none;color:var(--ink-dim);transition:color .18s}
+.choose-opt:hover,.choose-opt:focus-visible{border-color:rgba(217,119,87,.5);transform:translateY(-2px)}
+.choose-opt:hover .choose-icon,.choose-opt:focus-visible .choose-icon{color:var(--clay)}
+
+.pray-dawn-note{text-align:center;font-size:11px;color:var(--ink-dim);line-height:1.6;margin:-8px 0 18px}
+.pray-dawn-note.hide{display:none}
 
 .field{
   display:flex;align-items:center;gap:12px;
@@ -489,6 +506,21 @@ body{
       <path d="M4 20l1-4.5L15.5 5 19 8.5 8.5 19 4 20Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
       <path d="M13.5 6.5 17.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </symbol>
+    <symbol id="ic-book" viewBox="0 0 24 24">
+      <path d="M12 6.5c-1.5-1.3-3.8-2-6.5-2-.8 0-1.5.7-1.5 1.5v11.5c0 .5.4.8.9.7 2.4-.5 4.7.1 6.1 1.3M12 6.5c1.5-1.3 3.8-2 6.5-2 .8 0 1.5.7 1.5 1.5v11.5c0 .5-.4.8-.9.7-2.4-.5-4.7.1-6.1 1.3M12 6.5v12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ic-pray" viewBox="0 0 24 24">
+      <path d="M12 3v18M5.5 9h13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ic-sunrise" viewBox="0 0 24 24">
+      <path d="M4 15a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M12 3v3.5M5 8l1.6 1.6M19 8l-1.6 1.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      <line x1="2.5" y1="18" x2="21.5" y2="18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ic-clock" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8.3" fill="none" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M12 7.5v5l3.3 1.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
   </defs>
 </svg>
 
@@ -556,6 +588,22 @@ body{
     </div>
   </section>
 
+  <section id="s-choose" class="screen">
+    <p class="who" id="choose-name">—</p>
+    <p class="ask" style="font-size:17px;margin-bottom:24px">무엇을 기록할까요?</p>
+    <div class="choose-grid">
+      <button class="choose-opt" id="choose-word">
+        <svg class="choose-icon"><use href="#ic-book"/></svg>
+        <span>말씀</span>
+      </button>
+      <button class="choose-opt" id="choose-pray">
+        <svg class="choose-icon"><use href="#ic-pray"/></svg>
+        <span>기도</span>
+      </button>
+    </div>
+    <button class="back" id="back-who-5">← 다른 이름 고르기</button>
+  </section>
+
   <section id="s-add" class="screen">
     <p class="who" id="who-name">—</p>
     <p class="sofar" id="who-sofar"></p>
@@ -589,6 +637,30 @@ body{
     <button class="solid" id="save">기록하기</button>
     <p class="err" id="err"></p>
     <button class="back" id="back-who">← 다른 이름 고르기</button>
+  </section>
+
+  <section id="s-pray" class="screen">
+    <p class="who" id="pray-who-name">—</p>
+    <p class="sofar" id="pray-who-sofar"></p>
+    <p class="ask" style="font-size:17px;margin-bottom:20px">오늘 기도한 내용을 선택해주세요</p>
+    <div class="method-picker pray-picker" id="pray-picker">
+      <button class="method-opt" data-item="dawn" id="pray-dawn-btn">
+        <svg class="method-icon"><use href="#ic-sunrise"/></svg>
+        <span class="method-label">새벽예배 참석<br>×20점</span>
+      </button>
+      <button class="method-opt" data-item="min">
+        <svg class="method-icon"><use href="#ic-clock"/></svg>
+        <span class="method-label">기도 1분 이상<br>×4점</span>
+      </button>
+      <button class="method-opt" data-item="letter">
+        <svg class="method-icon"><use href="#ic-pen"/></svg>
+        <span class="method-label">자필 기도문 편지<br>×10점</span>
+      </button>
+    </div>
+    <p class="pray-dawn-note hide" id="pray-dawn-note">새벽예배는 하루에 한 번만 기록할 수 있어요 · 자정에 초기화됩니다</p>
+    <button class="solid" id="pray-save">저장하기</button>
+    <p class="err" id="pray-err"></p>
+    <button class="back" id="back-who-6">← 다른 이름 고르기</button>
   </section>
 
   <section id="s-rank" class="screen">
@@ -788,14 +860,34 @@ let wkExists = false;  // 같은 주차 기록이 이미 있는지
 
 function blank(){
   const o = {};
-  NAMES.forEach(n => o[n] = {total:0, ear:0, eye:0, hm:0, at:0});
+  NAMES.forEach(n => o[n] = {
+    total:0, ear:0, eye:0, hm:0,
+    pray_dawn:0, pray_dawn_date:null, pray_min:0, pray_letter:0,
+    at:0
+  });
   return o;
 }
-/* 배점: 귀=1점 눈=1.5점 손&입=2점. 랭킹은 이 점수 기준, 누적/돌무더기는 total(장수) 기준 */
-function scoreOf(n){
+/* 배점: 귀=1점 눈=1.5점 손&입=2점, 새벽예배=20점 기도1분=4점 편지=10점. 랭킹은 이 점수 기준, 누적/돌무더기는 total(장수) 기준 */
+function readScoreOf(n){
   const d = data[n];
   if(!d) return 0;
   return (d.ear||0) + (d.eye||0)*1.5 + (d.hm||0)*2;
+}
+function prayScoreOf(n){
+  const d = data[n];
+  if(!d) return 0;
+  return (d.pray_dawn||0)*20 + (d.pray_min||0)*4 + (d.pray_letter||0)*10;
+}
+function scoreOf(n){
+  return readScoreOf(n) + prayScoreOf(n);
+}
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function isDawnDoneToday(n){
+  const d = data[n];
+  return !!(d && d.pray_dawn_date === todayStr());
 }
 function note(msg){
   document.getElementById("mode-note").textContent = msg || "";
@@ -835,7 +927,7 @@ async function rpc(fn, body){
 
 async function load(){
   const r = await fetch(
-    SUPA_URL + "/rest/v1/mizpah_readers?select=name,total,ear,eye,hm,updated_at",
+    SUPA_URL + "/rest/v1/mizpah_readers?select=name,total,ear,eye,hm,pray_dawn,pray_dawn_date,pray_min,pray_letter,updated_at",
     { headers: H, cache: "no-store" }
   );
   if(!r.ok) throw new Error(await r.text());
@@ -845,6 +937,8 @@ async function load(){
     if(next[row.name]) next[row.name] = {
       total: row.total || 0,
       ear: row.ear || 0, eye: row.eye || 0, hm: row.hm || 0,
+      pray_dawn: row.pray_dawn || 0, pray_dawn_date: row.pray_dawn_date || null,
+      pray_min: row.pray_min || 0, pray_letter: row.pray_letter || 0,
       at: row.updated_at ? Date.parse(row.updated_at) : 0
     };
   });
@@ -1010,8 +1104,9 @@ async function runLeaderShuffle(){
 
 /* 방식별 기록(ear/eye/hm)이 있는 주는 점수 기준, 없는 옛 기록은 total(장수) 기준 */
 function pointsOf(p){
-  if(p.ear != null || p.eye != null || p.hm != null){
-    return (p.ear||0) + (p.eye||0)*1.5 + (p.hm||0)*2;
+  if(p.ear != null || p.eye != null || p.hm != null || p.pray_dawn != null || p.pray_min != null || p.pray_letter != null){
+    return (p.ear||0) + (p.eye||0)*1.5 + (p.hm||0)*2 +
+           (p.pray_dawn||0)*20 + (p.pray_min||0)*4 + (p.pray_letter||0)*10;
   }
   return p.total || 0;
 }
@@ -1126,7 +1221,7 @@ function buildNames(){
       '<span>' + n + '</span>' +
       '<span class="total">누적 <b>' + cumTotal(n) + '</b>장</span>' +
       (showRow ? (badgeHTML(n) || '<span class="badges"></span>') : "");
-    b.onclick = () => { me = n; openAdd(); };
+    b.onclick = () => { me = n; openChoose(); };
     box.appendChild(b);
   });
 }
@@ -1145,7 +1240,7 @@ function setAmount(v){
 
 function setMethod(m){
   selectedMethod = m;
-  document.querySelectorAll(".method-opt").forEach(b => {
+  document.querySelectorAll("#method-picker .method-opt").forEach(b => {
     b.classList.toggle("active", b.dataset.method === m);
   });
   updateSaveEnabled();
@@ -1153,6 +1248,47 @@ function setMethod(m){
 
 function updateSaveEnabled(){
   document.getElementById("save").disabled = !(amount >= 1 && selectedMethod);
+}
+
+function openChoose(){
+  document.getElementById("choose-name").textContent = me;
+  show("s-choose");
+}
+
+/* ── 기도 기록 ────────────────────────────── */
+
+let selectedPrayItems = new Set();
+
+function updatePrayUI(){
+  const dawnDone = isDawnDoneToday(me);
+  document.querySelectorAll("#pray-picker .method-opt").forEach(b => {
+    const item = b.dataset.item;
+    const isDawn = item === "dawn";
+    b.classList.toggle("active", selectedPrayItems.has(item));
+    b.classList.toggle("opt-disabled", isDawn && dawnDone);
+  });
+  document.getElementById("pray-dawn-note").classList.toggle("hide", !dawnDone);
+  document.getElementById("pray-save").disabled = selectedPrayItems.size === 0;
+}
+
+function togglePrayItem(item){
+  if(item === "dawn" && isDawnDoneToday(me)) return;
+  if(selectedPrayItems.has(item)) selectedPrayItems.delete(item);
+  else selectedPrayItems.add(item);
+  updatePrayUI();
+}
+
+async function openPray(){
+  document.getElementById("pray-who-name").textContent = me;
+  document.getElementById("pray-who-sofar").textContent = "불러오는 중…";
+  document.getElementById("pray-err").textContent = "";
+  selectedPrayItems = new Set();
+  show("s-pray");
+  try{ await load(); }catch(e){ note("기록을 불러오지 못했습니다 · 연결을 확인해 주세요"); }
+  updatePrayUI();
+  const pts = prayScoreOf(me);
+  document.getElementById("pray-who-sofar").innerHTML =
+    pts > 0 ? "이번 주 기도 <b>" + pts + "</b>점" : "아직 기도 기록이 없습니다";
 }
 
 async function openAdd(){
@@ -1212,11 +1348,13 @@ function drawBoard(animateFor, jump){
     const rise = (jump && jump.name === n && jump.delta > 0)
       ? '<span class="up">&#9650; ' + jump.delta + '</span>' : "";
 
+    const prayPts = prayScoreOf(n);
     const breakdown = score > 0
       ? '<div class="score-breakdown">' +
           '<span class="bd-item"><svg class="bd-icon"><use href="#ic-ear"/></svg>' + data[n].ear + '</span>' +
           '<span class="bd-item"><svg class="bd-icon"><use href="#ic-eye"/></svg>' + data[n].eye + '</span>' +
           '<span class="bd-item"><svg class="bd-icon"><use href="#ic-pen"/></svg>' + data[n].hm + '</span>' +
+          (prayPts > 0 ? '<span class="bd-item"><svg class="bd-icon"><use href="#ic-pray"/></svg>' + prayPts + '</span>' : "") +
         '</div>'
       : "";
 
@@ -1563,9 +1701,36 @@ document.querySelectorAll(".quick button").forEach(b => {
   b.onclick = () => setAmount(amount + parseInt(b.dataset.add, 10));
 });
 document.getElementById("clear-amt").onclick = () => setAmount(0);
-document.querySelectorAll(".method-opt").forEach(b => {
+document.querySelectorAll("#method-picker .method-opt").forEach(b => {
   b.onclick = () => setMethod(b.dataset.method);
 });
+document.getElementById("choose-word").onclick = () => openAdd();
+document.getElementById("choose-pray").onclick = () => openPray();
+document.getElementById("back-who-5").onclick = () => show("s-who");
+document.getElementById("back-who-6").onclick = () => show("s-who");
+document.querySelectorAll("#pray-picker .method-opt").forEach(b => {
+  b.onclick = () => togglePrayItem(b.dataset.item);
+});
+document.getElementById("pray-save").onclick = async () => {
+  const err = document.getElementById("pray-err");
+  const btn = document.getElementById("pray-save");
+  if(selectedPrayItems.size === 0){ err.textContent = "기록할 항목을 선택해주세요"; return; }
+
+  const items = { dawn: selectedPrayItems.has("dawn"), min: selectedPrayItems.has("min"), letter: selectedPrayItems.has("letter") };
+  btn.disabled = true; btn.textContent = "저장하는 중…"; err.textContent = "";
+  try{
+    await rpc("add_prayer", { p_name: me, p_dawn: items.dawn, p_min: items.min, p_letter: items.letter });
+    selectedPrayItems = new Set();
+    await load();
+    document.getElementById("toast").innerHTML = "";
+    show("s-rank");
+    drawBoard();
+    document.getElementById("toast").innerHTML = '<div class="toast">' + me + ' · 기도 기록을 저장했습니다</div>';
+  }catch(e){
+    err.textContent = "기록에 실패했습니다 · 잠시 후 다시 눌러주세요";
+  }
+  btn.disabled = false; btn.textContent = "저장하기";
+};
 
 const METHOD_LABEL = { ear: "귀로 듣는", eye: "눈으로 보는", hm: "손과 입을 활용한" };
 
