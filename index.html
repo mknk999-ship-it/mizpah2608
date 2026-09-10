@@ -1699,11 +1699,22 @@ document.getElementById("pray-save").onclick = async () => {
   try{
     await rpc("add_prayer", { p_name: me, p_dawn: items.dawn, p_min: items.min, p_letter: items.letter });
     selectedPrayItems = new Set();
-    await load();
+
+    const wasScore = scoreOf(me);
+    const wasRank  = ranked().indexOf(me);
+
     document.getElementById("toast").innerHTML = "";
     show("s-rank");
     drawBoard();
-    document.getElementById("toast").innerHTML = '<div class="toast">' + me + ' · 기도 기록을 저장했습니다</div>';
+
+    await load();
+    const nowRank = ranked().indexOf(me);
+
+    setTimeout(() => {
+      reorder({ name: me, delta: wasRank - nowRank }, wasScore);
+      document.getElementById("toast").innerHTML =
+        '<div class="toast">' + me + ' · 기도 기록을 저장했습니다</div>';
+    }, 550);
   }catch(e){
     err.textContent = "기록에 실패했습니다 · 잠시 후 다시 눌러주세요";
   }
