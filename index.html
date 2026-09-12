@@ -1565,7 +1565,7 @@ async function refreshWeekPick(){
   }
 }
 document.getElementById("wk-prev").onclick = () => { wkOffset--; refreshWeekPick(); };
-document.getElementById("wk-next").onclick = () => { if(wkOffset < 1){ wkOffset++; refreshWeekPick(); } };
+document.getElementById("wk-next").onclick = () => { if(wkOffset < 3){ wkOffset++; refreshWeekPick(); } };
 
 async function doReset(){
   const btn = document.getElementById("ok-go");
