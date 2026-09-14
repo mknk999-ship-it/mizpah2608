@@ -165,7 +165,26 @@ body{
   text-align:center;font-size:12.5px;font-weight:700;letter-spacing:.18em;
   color:var(--ink-dim);margin-top:-10px;margin-bottom:16px;
 }
-#go-timer{margin-bottom:14px}
+.feature-grid{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-bottom:14px;
+}
+.feature-card{
+  width:calc((100% - 24px)/3);aspect-ratio:1;cursor:pointer;
+  background:var(--paper-2);border:1px solid rgba(46,40,34,.14);border-radius:16px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;
+  transition:border-color .2s,transform .2s,box-shadow .2s;
+}
+.feature-card:hover,.feature-card:focus-visible{
+  border-color:var(--clay);transform:translateY(-2px);box-shadow:0 6px 14px rgba(46,40,34,.08);
+}
+.feature-card:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
+.feature-badge{
+  width:40px;height:40px;border-radius:50%;background:var(--clay);flex:none;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 5px 12px rgba(217,119,87,.35);
+}
+.feature-icon{width:20px;height:20px;color:#FFF7F3}
+.feature-label{font-size:12px;font-weight:600;color:var(--ink);letter-spacing:.02em;text-align:center}
 .leader-order-box{text-align:center;margin-top:22px}
 .leader-order-box.hide{display:none}
 
@@ -526,6 +545,11 @@ body{
       <circle cx="12" cy="12" r="8.3" fill="none" stroke="currentColor" stroke-width="1.6"/>
       <path d="M12 7.5v5l3.3 1.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
     </symbol>
+    <symbol id="ic-hourglass" viewBox="0 0 24 24">
+      <path d="M6 3.2h12M6 20.8h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M7 3.2v3.1c0 2 1.7 3.4 3.6 4.7.4.28.4.9 0 1.18C8.7 13.5 7 14.9 7 16.9v3.9M17 3.2v3.1c0 2-1.7 3.4-3.6 4.7-.4.28-.4.9 0 1.18 1.9 1.32 3.6 2.72 3.6 4.72v3.9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="12" cy="16.4" r=".9" fill="currentColor" stroke="none"/>
+    </symbol>
   </defs>
 </svg>
 
@@ -571,7 +595,12 @@ body{
 
     <div class="section-divider"></div>
     <p class="section-title">부가기능</p>
-    <button class="ghost" id="go-timer">기도 타이머</button>
+    <div class="feature-grid">
+      <button class="feature-card" id="go-timer">
+        <span class="feature-badge"><svg class="feature-icon"><use href="#ic-hourglass"/></svg></span>
+        <span class="feature-label">기도 타이머</span>
+      </button>
+    </div>
 
     <div class="section-divider"></div>
     <div class="leader hide" id="leader-box">
