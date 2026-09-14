@@ -257,6 +257,14 @@ body{
 .pray-dawn-note{text-align:center;font-size:11px;color:var(--ink-dim);line-height:1.6;margin:-8px 0 18px}
 .pray-dawn-note.hide{display:none}
 
+.timer-display{
+  text-align:center;font-family:var(--mono);font-weight:700;font-size:56px;
+  color:var(--ink);letter-spacing:.02em;margin-bottom:26px;
+}
+.timer-note{text-align:center;font-size:12px;color:var(--ink-dim);margin-top:14px;line-height:1.6}
+.timer-stop{background:#B85C3E}
+#timer-start.hide,#timer-stop.hide{display:none}
+
 .field{
   display:flex;align-items:center;gap:12px;
   background:var(--paper-2);border:1px solid rgba(46,40,34,.14);
@@ -557,6 +565,9 @@ body{
     <button class="ghost" id="go-medal-guide">메달 방식 안내</button>
 
     <div class="section-divider"></div>
+    <button class="ghost" id="go-timer">기도 타이머</button>
+
+    <div class="section-divider"></div>
     <div class="leader hide" id="leader-box">
       <p class="leader-eyebrow">이번 주 인도자</p>
       <div class="leader-seal" id="leader-seal"><span id="leader-name">—</span></div>
@@ -653,6 +664,15 @@ body{
     <button class="solid" id="pray-save">저장하기</button>
     <p class="err" id="pray-err"></p>
     <button class="back" id="back-who-6">← 다른 이름 고르기</button>
+  </section>
+
+  <section id="s-timer" class="screen">
+    <p class="ask" style="font-size:19px;margin-bottom:26px">기도 타이머</p>
+    <div class="timer-display" id="timer-display">00:00</div>
+    <button class="solid" id="timer-start">시작</button>
+    <button class="solid timer-stop hide" id="timer-stop">종료</button>
+    <p class="timer-note" id="timer-note"></p>
+    <button class="back" id="back-who-7">← 처음으로</button>
   </section>
 
   <section id="s-rank" class="screen">
@@ -1285,6 +1305,53 @@ async function openPray(){
     pts > 0 ? "이번 주 기도 <b>" + pts + "</b>점" : "아직 기도 기록이 없습니다";
 }
 
+/* ── 기도 타이머 ──────────────────────────── */
+
+let timerHandle = null;
+let timerSeconds = 0;
+let timerAudioCtx = null;
+let timerAlerted = false;
+
+function fmtTime(s){
+  const m = Math.floor(s / 60), sec = s % 60;
+  return String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
+}
+
+function timerBeep(ctx, delay){
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = "sine";
+  osc.frequency.value = 880;
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  const t0 = ctx.currentTime + delay;
+  gain.gain.setValueAtTime(0.0001, t0);
+  gain.gain.exponentialRampToValueAtTime(0.3, t0 + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.15);
+  osc.start(t0);
+  osc.stop(t0 + 0.16);
+}
+
+function timerPlayBeeps(){
+  if(!timerAudioCtx) return;
+  try{ for(let i = 0; i < 5; i++) timerBeep(timerAudioCtx, i * 0.22); }catch(e){}
+}
+
+function stopTimer(){
+  if(timerHandle){ clearInterval(timerHandle); timerHandle = null; }
+  document.getElementById("timer-start").classList.remove("hide");
+  document.getElementById("timer-stop").classList.add("hide");
+}
+
+function openTimer(){
+  stopTimer();
+  timerSeconds = 0;
+  timerAlerted = false;
+  document.getElementById("timer-display").textContent = fmtTime(0);
+  document.getElementById("timer-note").textContent = "";
+  show("s-timer");
+}
+
 async function openAdd(){
   document.getElementById("who-name").textContent = me;
   document.getElementById("who-sofar").textContent = "불러오는 중…";
@@ -1689,6 +1756,38 @@ document.getElementById("back-who-6").onclick = () => show("s-who");
 document.querySelectorAll("#pray-picker .method-opt").forEach(b => {
   b.onclick = () => togglePrayItem(b.dataset.item);
 });
+
+document.getElementById("go-timer").onclick = () => openTimer();
+document.getElementById("back-who-7").onclick = () => { stopTimer(); show("s-who"); };
+document.getElementById("timer-start").onclick = () => {
+  try{
+    timerAudioCtx = timerAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if(timerAudioCtx.state === "suspended") timerAudioCtx.resume();
+  }catch(e){ timerAudioCtx = null; }
+
+  timerSeconds = 0;
+  timerAlerted = false;
+  document.getElementById("timer-display").textContent = fmtTime(0);
+  document.getElementById("timer-note").textContent = "";
+  document.getElementById("timer-start").classList.add("hide");
+  document.getElementById("timer-stop").classList.remove("hide");
+
+  timerHandle = setInterval(() => {
+    timerSeconds++;
+    document.getElementById("timer-display").textContent = fmtTime(timerSeconds);
+    if(timerSeconds >= 60 && !timerAlerted){
+      timerAlerted = true;
+      if(navigator.vibrate) navigator.vibrate([200,120,200,120,200,120,200,120,200]);
+      timerPlayBeeps();
+      document.getElementById("timer-note").textContent = "1분을 채웠습니다";
+    }
+  }, 1000);
+};
+document.getElementById("timer-stop").onclick = () => {
+  const finished = fmtTime(timerSeconds);
+  stopTimer();
+  document.getElementById("timer-note").textContent = "총 " + finished + " 기도했습니다";
+};
 document.getElementById("pray-save").onclick = async () => {
   const err = document.getElementById("pray-err");
   const btn = document.getElementById("pray-save");
