@@ -832,13 +832,13 @@ body{
 
       <div class="mg-card">
         <div class="mg-row mg-dia-row">
-          <div class="dia-badge"><svg class="dia"><use href="#dia"/></svg><b>×1</b></div>
+          <div class="dia-badge"><svg class="dia"><use href="#dia"/></svg></div>
           <span class="mg-arrow">→</span>
           <div class="dia-badge"><svg class="dia"><use href="#dia"/></svg><b>×2</b></div>
           <span class="mg-arrow">→</span>
           <div class="dia-badge"><svg class="dia"><use href="#dia"/></svg><b>×3</b></div>
         </div>
-        <p class="mg-desc">다이아몬드는 더 승급하지 않고, 모일 때마다<br>◇×1 · ◇×2 · ◇×3 처럼 개수로 표시됩니다</p>
+        <p class="mg-desc">다이아몬드는 더 승급하지 않고, 1개일 땐 ◇만,<br>2개부터는 ◇×2 · ◇×3 처럼 개수로 표시됩니다</p>
       </div>
     </div>
 
@@ -1208,7 +1208,7 @@ function badgeHTML(name){
   const d = Math.floor(g / 3); g = g % 3;   // 금 → 다이아
 
   let h = "";
-  if(d > 0) h += '<span class="dia-badge"><svg class="dia"><use href="#dia"/></svg><b>×' + d + '</b></span>';
+  if(d > 0) h += '<span class="dia-badge"><svg class="dia"><use href="#dia"/></svg>' + (d > 1 ? '<b>×' + d + '</b>' : '') + '</span>';
   let medalH = "";
   [["b1",g],["b2",s],["b3",b]].forEach(([cls,n]) => {
     for(let i = 0; i < n; i++) medalH += '<i class="bdg ' + cls + '"></i>';
