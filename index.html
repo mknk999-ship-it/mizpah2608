@@ -1062,8 +1062,17 @@ async function addChapters(name, amt, method){
 }
 
 /* ── 활동 기록 로그 (주차별 시스템 알림) ───────── */
+/* 캘린더상 "이번 주"가 이미 마감되어 지난 기록으로 저장된 경우(예: 토요일에 조기 마감),
+   아직 마감되지 않은 다음 주로 넘어갈 때까지 한 주씩 전진시켜 실제 진행 중인 주를 찾는다 */
 function currentWeekKey(){
-  return weekInfo(new Date()).key;
+  let d = new Date();
+  let key = weekInfo(d).key;
+  while(archives.some(a => a.week_key === key)){
+    d = new Date(d);
+    d.setDate(d.getDate() + 7);
+    key = weekInfo(d).key;
+  }
+  return key;
 }
 function logActivity(weekKey, kind, message){
   /* 기록 실패해도 본 기능엔 영향 없도록 결과를 기다리지 않음 */
