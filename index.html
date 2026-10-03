@@ -188,6 +188,36 @@ body{
 .leader-order-box{text-align:center;margin-top:22px}
 .leader-order-box.hide{display:none}
 
+/* 활동 기록 */
+.log-date{
+  text-align:center;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;
+  color:var(--ink-dim);margin:24px 0 10px;
+}
+.log-date:first-child{margin-top:0}
+.log-row{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:10px 12px;border-radius:10px;background:var(--paper-2);
+  border:1px solid rgba(46,40,34,.08);margin-bottom:6px;
+}
+.log-row::before{
+  content:"";width:6px;height:6px;border-radius:50%;flex:none;margin-top:5px;
+  background:var(--ink-dim);
+}
+.log-time{font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);flex:none;width:32px;margin-top:1px}
+.log-msg{font-size:12.5px;color:var(--ink);line-height:1.55}
+.log-row.kind-prayer::before{background:var(--clay)}
+.log-row.kind-rank::before{background:#C9A03F}
+.log-row.kind-rank .log-msg{color:var(--clay);font-weight:600}
+.log-row.kind-leader::before{background:#a3823f}
+.log-row.kind-leader{background:linear-gradient(90deg, rgba(211,179,102,.12), rgba(246,242,234,0))}
+.log-row.kind-reset{
+  background:transparent;border:none;border-top:1px dashed rgba(46,40,34,.16);
+  flex-direction:column;align-items:center;gap:2px;padding:14px 0 4px;margin:10px 0 6px;
+}
+.log-row.kind-reset::before{display:none}
+.log-row.kind-reset .log-time{width:auto}
+.log-row.kind-reset .log-msg{color:var(--ink-dim);font-size:11.5px;letter-spacing:.03em;text-align:center}
+
 /* 하단 버전 표시 */
 .app-footer{margin-top:44px;text-align:center}
 .app-footer-rule{
@@ -590,6 +620,7 @@ body{
 
     <div class="names" id="names"></div>
     <button class="ghost gap" id="go-rank">이번주 점수랭킹</button>
+    <button class="ghost" id="go-activity-log">활동 기록 보기</button>
     <button class="ghost" id="go-arch-1">지난 기록 보기</button>
     <button class="ghost" id="go-medal-guide">메달 방식 안내</button>
 
@@ -730,7 +761,16 @@ body{
     <p class="ask" id="arch-title" style="font-size:19px;margin-bottom:6px">—</p>
     <p class="sub" id="arch-sub"></p>
     <div id="arch-board"></div>
-    <button class="ghost gap" id="arch-one-back">목록으로</button>
+    <button class="ghost gap" id="arch-one-activity">활동 기록 보기</button>
+    <button class="ghost" id="arch-one-back">목록으로</button>
+  </section>
+
+  <section id="s-activity-log" class="screen">
+    <p class="ask" id="activity-log-title" style="font-size:19px;margin-bottom:6px">활동 기록</p>
+    <p class="sub" id="activity-log-sub">기록을 시간 순으로 모았어요</p>
+    <div id="activity-log-list"><p class="loading">기록을 불러오는 중…</p></div>
+    <button class="ghost gap" id="activity-log-archives">지난 기록 보기</button>
+    <button class="ghost" id="activity-log-back">돌아가기</button>
   </section>
 
   <section id="s-changelog" class="screen">
@@ -905,6 +945,9 @@ let leaderData = null;    // {names:[...], current_idx:N}
 let wkOffset = 0;      // 마감 주차 조정 (0 = 지난주)
 let wkInfo = null;     // 현재 선택된 마감 주차
 let wkExists = false;  // 같은 주차 기록이 이미 있는지
+let curArchKey = null;   // 현재 열람 중인 지난 주 기록의 week_key
+let curArchLabel = "";   // 현재 열람 중인 지난 주 기록의 라벨
+let actLogFrom = "s-who"; // 활동 기록 화면에서 돌아갈 위치
 
 function blank(){
   const o = {};
@@ -996,6 +1039,28 @@ async function load(){
 }
 async function addChapters(name, amt, method){
   await rpc("add_chapters", { p_name: name, p_amount: amt, p_method: method });
+}
+
+/* ── 활동 기록 로그 (주차별 시스템 알림) ───────── */
+function currentWeekKey(){
+  return weekInfo(new Date()).key;
+}
+function logActivity(weekKey, kind, message){
+  /* 기록 실패해도 본 기능엔 영향 없도록 결과를 기다리지 않음 */
+  fetch(SUPA_URL + "/rest/v1/mizpah_activity_log", {
+    method: "POST",
+    headers: Object.assign({}, H, { "Prefer": "return=minimal" }),
+    body: JSON.stringify({ week_key: weekKey, kind: kind, message: message })
+  }).catch(() => {});
+}
+async function loadActivityLog(weekKey){
+  const r = await fetch(
+    SUPA_URL + "/rest/v1/mizpah_activity_log?select=created_at,kind,message&week_key=eq." +
+      encodeURIComponent(weekKey) + "&order=created_at.asc",
+    { headers: H, cache: "no-store" }
+  );
+  if(!r.ok) throw new Error(await r.text());
+  return await r.json();
 }
 async function loadArchives(){
   const r = await fetch(
@@ -1090,6 +1155,7 @@ async function advanceLeader(){
     renderLeader();
     popSeal();
     leaderToast("이번 주 인도자가 " + nextName + " 님으로 변경되었습니다");
+    logActivity(currentWeekKey(), "leader", "인도자가 " + names[prevIdx] + "님 → " + nextName + "님으로 넘어갔습니다");
   }catch(e){
     leaderData.current_idx = prevIdx;
     renderLeader();
@@ -1139,6 +1205,7 @@ async function runLeaderShuffle(){
     renderLeader();
     popSeal();
     leaderToast("새 순서가 정해졌습니다 · 이번 주 인도자 " + shuffled[0] + " 님");
+    logActivity(currentWeekKey(), "leader", "인도자 순서가 새로 추첨되었습니다 · 이번 주 인도자는 " + shuffled[0] + "님입니다");
   }catch(e){
     leaderData.names = prevNames;
     leaderData.current_idx = prevIdx;
@@ -1235,6 +1302,20 @@ function liveRanks(){
     map[n] = rank;
   });
   return map;
+}
+function top3List(){
+  const ranks = liveRanks();
+  return NAMES.filter(n => ranks[n] <= 3 && scoreOf(n) > 0)
+    .sort((a,b) => ranks[a] - ranks[b])
+    .map(n => ({ name: n, rank: ranks[n] }));
+}
+function logRankChangeIfNeeded(weekKey, before, after){
+  const beforeMap = {};
+  before.forEach(x => beforeMap[x.name] = x.rank);
+  const changed = after.filter(x => beforeMap[x.name] !== x.rank);
+  if(!changed.length) return;
+  const msg = "순위 변동 · " + changed.map(x => x.name + " " + x.rank + "등").join(" · ");
+  logActivity(weekKey, "rank", msg);
 }
 
 /* ── 누적 장수 (지난 주 합계 + 이번 주) ───────── */
@@ -1572,12 +1653,64 @@ async function openArchives(from){
 function openArchive(key){
   const a = archives.find(x => x.week_key === key);
   if(!a) return;
+  curArchKey = a.week_key;
+  curArchLabel = a.month + "월 " + a.week + "주";
   document.getElementById("arch-title").textContent = a.month + "월 " + a.week + "주 기록";
   const line = medalLine(a.records);
   document.getElementById("arch-sub").innerHTML =
     line || "이 주에는 쌓인 돌이 없습니다";
   drawArchive(a.records || []);
   show("s-arch-one");
+}
+
+/* ── 활동 기록 화면 ───────────────────────── */
+function fmtLogDate(iso){
+  const d = new Date(iso);
+  return (d.getFullYear() % 100) + "년 " + (d.getMonth() + 1) + "월 " + d.getDate() + "일";
+}
+function fmtLogTime(iso){
+  const d = new Date(iso);
+  return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+}
+async function openActivityLog(weekKey, title, sub, from){
+  actLogFrom = from;
+  document.getElementById("activity-log-title").textContent = title;
+  document.getElementById("activity-log-sub").textContent = sub;
+  show("s-activity-log");
+  const box = document.getElementById("activity-log-list");
+  box.innerHTML = '<p class="loading">기록을 불러오는 중…</p>';
+  try{
+    const rows = await loadActivityLog(weekKey);
+    drawActivityLog(rows);
+  }catch(e){
+    box.innerHTML = '<p class="loading">기록을 불러오지 못했습니다</p>';
+  }
+}
+function drawActivityLog(rows){
+  const box = document.getElementById("activity-log-list");
+  box.innerHTML = "";
+  if(!rows.length){
+    box.innerHTML = '<p class="loading">아직 기록이 없습니다</p>';
+    return;
+  }
+  let curDay = null;
+  rows.forEach(r => {
+    const d = new Date(r.created_at);
+    const dayKey = d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate();
+    if(dayKey !== curDay){
+      curDay = dayKey;
+      const h = document.createElement("div");
+      h.className = "log-date";
+      h.textContent = fmtLogDate(r.created_at);
+      box.appendChild(h);
+    }
+    const row = document.createElement("div");
+    row.className = "log-row kind-" + r.kind;
+    row.innerHTML =
+      '<span class="log-time">' + fmtLogTime(r.created_at) + '</span>' +
+      '<span class="log-msg">' + r.message + '</span>';
+    box.appendChild(row);
+  });
 }
 
 function drawArchive(records){
@@ -1696,6 +1829,8 @@ async function doReset(){
     await load();
     drawBoard();
     toast.innerHTML = '<div class="toast">&lt;' + w.label + '&gt;으로 저장하고 메달을 수여했습니다</div>';
+    logActivity(w.key, "reset", "이번 주 기록이 마감되었습니다");
+    logActivity(currentWeekKey(), "reset", "지난 주 기록이 마감되어 새 주가 시작되었습니다");
   }catch(e){
     document.getElementById("veil-ok").classList.remove("on");
     const msg = String(e && e.message || "");
@@ -1727,6 +1862,14 @@ document.getElementById("go-arch-1").onclick = () => openArchives("s-who");
 document.getElementById("go-arch-2").onclick = () => openArchives("s-rank");
 document.getElementById("arch-back").onclick = () => show(archFrom);
 document.getElementById("arch-one-back").onclick = () => show("s-archs");
+document.getElementById("go-activity-log").onclick = () => openActivityLog(
+  currentWeekKey(), "이번 주 활동 기록", "이번 주에 쌓인 기록들을 시간 순으로 모았어요", "s-who"
+);
+document.getElementById("arch-one-activity").onclick = () => openActivityLog(
+  curArchKey, curArchLabel + " 활동 기록", curArchLabel + "에 쌓인 기록들을 시간 순으로 모았어요", "s-arch-one"
+);
+document.getElementById("activity-log-back").onclick = () => show(actLogFrom);
+document.getElementById("activity-log-archives").onclick = () => openArchives("s-activity-log");
 document.getElementById("go-changelog").onclick = () => openChangelog("s-who");
 document.getElementById("changelog-back").onclick = () => show(clFrom);
 document.getElementById("go-medal-guide").onclick = () => openMedalGuide("s-who");
@@ -1845,6 +1988,12 @@ document.getElementById("pray-save").onclick = async () => {
 
     const wasScore = scoreOf(me);
     const wasRank  = ranked().indexOf(me);
+    const beforeTop3 = top3List();
+
+    const weekKey = currentWeekKey();
+    if(items.dawn) logActivity(weekKey, "prayer", me + "님이 새벽예배를 완료했습니다 (+" + dawnPointsFor(me) + "점)");
+    if(items.min) logActivity(weekKey, "prayer", me + "님이 1분 이상 기도했습니다 (+4점)");
+    if(items.letter) logActivity(weekKey, "prayer", me + "님이 자필편지 기도문을 작성했습니다 (+10점)");
 
     document.getElementById("toast").innerHTML = "";
     show("s-rank");
@@ -1852,6 +2001,7 @@ document.getElementById("pray-save").onclick = async () => {
 
     await load();
     const nowRank = ranked().indexOf(me);
+    logRankChangeIfNeeded(weekKey, beforeTop3, top3List());
 
     setTimeout(() => {
       reorder({ name: me, delta: wasRank - nowRank }, wasScore);
@@ -1865,6 +2015,7 @@ document.getElementById("pray-save").onclick = async () => {
 };
 
 const METHOD_LABEL = { ear: "귀로 듣는", eye: "눈으로 보는", hm: "손과 입을 활용한" };
+const METHOD_VERB = { ear: "귀로 들었습니다", eye: "눈으로 읽었습니다", hm: "손과 입을 활용하여 읽었습니다" };
 
 document.getElementById("save").onclick = async () => {
   const err = document.getElementById("err");
@@ -1882,6 +2033,11 @@ document.getElementById("save").onclick = async () => {
 
     const wasScore = scoreOf(me);
     const wasRank  = ranked().indexOf(me);
+    const beforeTop3 = top3List();
+
+    const weekKey = currentWeekKey();
+    const pts = method === "eye" ? v * 1.5 : method === "hm" ? v * 2 : v;
+    logActivity(weekKey, "read", me + "님이 말씀 " + v + "장을 " + METHOD_VERB[method] + " (+" + pts + "점)");
 
     document.getElementById("toast").innerHTML = "";
     show("s-rank");
@@ -1889,6 +2045,7 @@ document.getElementById("save").onclick = async () => {
 
     await load();
     const nowRank = ranked().indexOf(me);
+    logRankChangeIfNeeded(weekKey, beforeTop3, top3List());
 
     setTimeout(() => {
       reorder({ name: me, delta: wasRank - nowRank }, wasScore);
