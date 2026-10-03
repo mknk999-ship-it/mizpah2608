@@ -746,7 +746,6 @@ body{
     <div id="board"><p class="loading">점수를 세는 중…</p></div>
     <div id="toast"></div>
     <button class="ghost gap" id="back-who-2">처음으로 돌아가기</button>
-    <button class="ghost" id="go-arch-2">지난 기록 보기</button>
     <button class="danger" id="reset-btn">이번 주 마감하고 초기화</button>
   </section>
 
@@ -1861,7 +1860,6 @@ document.getElementById("back-who-2").onclick = () => {
   show("s-who");
 };
 document.getElementById("go-arch-1").onclick = () => openArchives("s-who");
-document.getElementById("go-arch-2").onclick = () => openArchives("s-rank");
 document.getElementById("arch-back").onclick = () => show(archFrom);
 document.getElementById("arch-one-back").onclick = () => show("s-archs");
 document.getElementById("arch-home").onclick = () => show("s-who");
