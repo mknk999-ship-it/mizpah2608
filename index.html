@@ -1248,6 +1248,15 @@ function cumTotal(n){
   return t;
 }
 
+/* ── 개인별 최고 점수 (지난 주들 중 최고점 vs 이번 주 진행 중 점수) ───────── */
+function bestScore(n){
+  let best = 0;
+  archives.forEach(a => {
+    (a.records || []).forEach(p => { if(p.name === n) best = Math.max(best, pointsOf(p)); });
+  });
+  return Math.max(best, scoreOf(n));
+}
+
 function show(id){
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("on"));
   document.getElementById(id).classList.add("on");
@@ -1267,7 +1276,7 @@ function buildNames(){
     b.innerHTML =
       (isLeader ? '<span class="name-tag">인도자</span>' : "") +
       '<span>' + n + '</span>' +
-      '<span class="total">누적 <b>' + cumTotal(n) + '</b>장</span>' +
+      '<span class="total">최고 <b>' + bestScore(n) + '</b>점</span>' +
       (showRow ? (badgeHTML(n) || '<span class="badges"></span>') : "");
     b.onclick = () => { me = n; openChoose(); };
     box.appendChild(b);
