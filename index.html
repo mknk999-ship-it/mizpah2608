@@ -771,8 +771,7 @@ body{
     <p class="ask" id="activity-log-title" style="font-size:19px;margin-bottom:6px">로그 상황판</p>
     <p class="sub" id="activity-log-sub">기록을 시간 순으로 모았어요</p>
     <div id="activity-log-list"><p class="loading">기록을 불러오는 중…</p></div>
-    <button class="ghost gap" id="activity-log-archives">지난 기록 보기</button>
-    <button class="ghost" id="activity-log-back">돌아가기</button>
+    <button class="ghost gap" id="activity-log-back">돌아가기</button>
     <button class="ghost" id="activity-log-home">메인 페이지로 가기</button>
   </section>
 
@@ -1875,7 +1874,6 @@ document.getElementById("arch-one-activity").onclick = () => openActivityLog(
   curArchKey, curArchLabel + " 로그 상황판", curArchLabel + "에 쌓인 기록들을 시간 순으로 모았어요", "s-arch-one"
 );
 document.getElementById("activity-log-back").onclick = () => show(actLogFrom);
-document.getElementById("activity-log-archives").onclick = () => openArchives("s-activity-log");
 document.getElementById("go-changelog").onclick = () => openChangelog("s-who");
 document.getElementById("changelog-back").onclick = () => show(clFrom);
 document.getElementById("go-medal-guide").onclick = () => openMedalGuide("s-who");
