@@ -781,7 +781,6 @@ body{
     <p class="sub" id="activity-log-sub">기록을 시간 순으로 모았어요</p>
     <div id="activity-log-list"><p class="loading">기록을 불러오는 중…</p></div>
     <button class="ghost gap" id="activity-log-back">돌아가기</button>
-    <button class="home-btn" id="activity-log-home">HOME</button>
   </section>
 
   <section id="s-changelog" class="screen">
@@ -1874,7 +1873,6 @@ document.getElementById("arch-back").onclick = () => show(archFrom);
 document.getElementById("arch-one-back").onclick = () => show("s-archs");
 document.getElementById("arch-home").onclick = () => show("s-who");
 document.getElementById("arch-one-home").onclick = () => show("s-who");
-document.getElementById("activity-log-home").onclick = () => show("s-who");
 document.getElementById("go-activity-log").onclick = () => openActivityLog(
   currentWeekKey(), "이번 주 로그 상황판", "이번 주에 쌓인 기록들을 시간 순으로 모았어요", "s-who"
 );
