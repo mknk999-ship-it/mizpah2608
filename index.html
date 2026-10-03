@@ -620,7 +620,7 @@ body{
 
     <div class="names" id="names"></div>
     <button class="ghost gap" id="go-rank">이번주 점수랭킹</button>
-    <button class="ghost" id="go-activity-log">활동 기록 보기</button>
+    <button class="ghost" id="go-activity-log">로그 상황판</button>
     <button class="ghost" id="go-arch-1">지난 기록 보기</button>
     <button class="ghost" id="go-medal-guide">메달 방식 안내</button>
 
@@ -761,12 +761,12 @@ body{
     <p class="ask" id="arch-title" style="font-size:19px;margin-bottom:6px">—</p>
     <p class="sub" id="arch-sub"></p>
     <div id="arch-board"></div>
-    <button class="ghost gap" id="arch-one-activity">활동 기록 보기</button>
+    <button class="ghost gap" id="arch-one-activity">로그 상황판</button>
     <button class="ghost" id="arch-one-back">목록으로</button>
   </section>
 
   <section id="s-activity-log" class="screen">
-    <p class="ask" id="activity-log-title" style="font-size:19px;margin-bottom:6px">활동 기록</p>
+    <p class="ask" id="activity-log-title" style="font-size:19px;margin-bottom:6px">로그 상황판</p>
     <p class="sub" id="activity-log-sub">기록을 시간 순으로 모았어요</p>
     <div id="activity-log-list"><p class="loading">기록을 불러오는 중…</p></div>
     <button class="ghost gap" id="activity-log-archives">지난 기록 보기</button>
@@ -1863,10 +1863,10 @@ document.getElementById("go-arch-2").onclick = () => openArchives("s-rank");
 document.getElementById("arch-back").onclick = () => show(archFrom);
 document.getElementById("arch-one-back").onclick = () => show("s-archs");
 document.getElementById("go-activity-log").onclick = () => openActivityLog(
-  currentWeekKey(), "이번 주 활동 기록", "이번 주에 쌓인 기록들을 시간 순으로 모았어요", "s-who"
+  currentWeekKey(), "이번 주 로그 상황판", "이번 주에 쌓인 기록들을 시간 순으로 모았어요", "s-who"
 );
 document.getElementById("arch-one-activity").onclick = () => openActivityLog(
-  curArchKey, curArchLabel + " 활동 기록", curArchLabel + "에 쌓인 기록들을 시간 순으로 모았어요", "s-arch-one"
+  curArchKey, curArchLabel + " 로그 상황판", curArchLabel + "에 쌓인 기록들을 시간 순으로 모았어요", "s-arch-one"
 );
 document.getElementById("activity-log-back").onclick = () => show(actLogFrom);
 document.getElementById("activity-log-archives").onclick = () => openArchives("s-activity-log");
