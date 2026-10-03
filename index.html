@@ -276,6 +276,15 @@ body{
 }
 .danger:hover{background:rgba(184,92,62,.07)}
 
+.home-btn{
+  display:block;width:100%;margin-top:12px;cursor:pointer;
+  background:transparent;border:1px solid rgba(217,119,87,.4);border-radius:3px;
+  color:var(--clay);font-family:var(--body);font-weight:600;font-size:13px;letter-spacing:.18em;
+  padding:15px;transition:background .22s,border-color .22s;
+}
+.home-btn.gap{margin-top:22px}
+.home-btn:hover,.home-btn:focus-visible{background:rgba(217,119,87,.08);border-color:var(--clay)}
+
 .who{text-align:center;font-family:var(--display);font-size:26px;margin-bottom:4px}
 .sofar{text-align:center;font-size:12px;color:var(--ink-dim);margin-bottom:30px;letter-spacing:.05em}
 .sofar b{font-family:var(--mono);font-weight:700;color:var(--stone);font-size:13px}
@@ -745,7 +754,7 @@ body{
     <p class="ask" style="font-size:19px;margin-bottom:22px">이번주 말씀과 기도 점수</p>
     <div id="board"><p class="loading">점수를 세는 중…</p></div>
     <div id="toast"></div>
-    <button class="ghost gap" id="back-who-2">처음으로 돌아가기</button>
+    <button class="home-btn gap" id="back-who-2">HOME</button>
     <button class="danger" id="reset-btn">이번 주 마감하고 초기화</button>
   </section>
 
@@ -754,7 +763,7 @@ body{
     <p class="sub">마감된 주간의 기록입니다</p>
     <div id="arch-list"><p class="loading">기록을 찾는 중…</p></div>
     <button class="ghost gap" id="arch-back">돌아가기</button>
-    <button class="ghost" id="arch-home">메인 페이지로 가기</button>
+    <button class="home-btn" id="arch-home">HOME</button>
   </section>
 
   <section id="s-arch-one" class="screen">
@@ -763,7 +772,7 @@ body{
     <div id="arch-board"></div>
     <button class="ghost gap" id="arch-one-activity">로그 상황판</button>
     <button class="ghost" id="arch-one-back">목록으로</button>
-    <button class="ghost" id="arch-one-home">메인 페이지로 가기</button>
+    <button class="home-btn" id="arch-one-home">HOME</button>
   </section>
 
   <section id="s-activity-log" class="screen">
@@ -771,7 +780,7 @@ body{
     <p class="sub" id="activity-log-sub">기록을 시간 순으로 모았어요</p>
     <div id="activity-log-list"><p class="loading">기록을 불러오는 중…</p></div>
     <button class="ghost gap" id="activity-log-back">돌아가기</button>
-    <button class="ghost" id="activity-log-home">메인 페이지로 가기</button>
+    <button class="home-btn" id="activity-log-home">HOME</button>
   </section>
 
   <section id="s-changelog" class="screen">
