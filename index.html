@@ -755,6 +755,7 @@ body{
     <p class="sub">마감된 주간의 기록입니다</p>
     <div id="arch-list"><p class="loading">기록을 찾는 중…</p></div>
     <button class="ghost gap" id="arch-back">돌아가기</button>
+    <button class="ghost" id="arch-home">메인 페이지로 가기</button>
   </section>
 
   <section id="s-arch-one" class="screen">
@@ -763,6 +764,7 @@ body{
     <div id="arch-board"></div>
     <button class="ghost gap" id="arch-one-activity">로그 상황판</button>
     <button class="ghost" id="arch-one-back">목록으로</button>
+    <button class="ghost" id="arch-one-home">메인 페이지로 가기</button>
   </section>
 
   <section id="s-activity-log" class="screen">
@@ -771,6 +773,7 @@ body{
     <div id="activity-log-list"><p class="loading">기록을 불러오는 중…</p></div>
     <button class="ghost gap" id="activity-log-archives">지난 기록 보기</button>
     <button class="ghost" id="activity-log-back">돌아가기</button>
+    <button class="ghost" id="activity-log-home">메인 페이지로 가기</button>
   </section>
 
   <section id="s-changelog" class="screen">
@@ -1862,6 +1865,9 @@ document.getElementById("go-arch-1").onclick = () => openArchives("s-who");
 document.getElementById("go-arch-2").onclick = () => openArchives("s-rank");
 document.getElementById("arch-back").onclick = () => show(archFrom);
 document.getElementById("arch-one-back").onclick = () => show("s-archs");
+document.getElementById("arch-home").onclick = () => show("s-who");
+document.getElementById("arch-one-home").onclick = () => show("s-who");
+document.getElementById("activity-log-home").onclick = () => show("s-who");
 document.getElementById("go-activity-log").onclick = () => openActivityLog(
   currentWeekKey(), "이번 주 로그 상황판", "이번 주에 쌓인 기록들을 시간 순으로 모았어요", "s-who"
 );
