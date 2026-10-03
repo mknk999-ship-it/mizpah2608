@@ -755,7 +755,7 @@ body{
     <p class="ask" style="font-size:19px;margin-bottom:22px">이번주 말씀과 기도 점수</p>
     <div id="board"><p class="loading">점수를 세는 중…</p></div>
     <div id="toast"></div>
-    <button class="home-btn gap" id="back-who-2">HOME</button>
+    <button class="ghost gap" id="back-who-2">돌아가기</button>
     <button class="danger" id="reset-btn">이번 주 마감하고 초기화</button>
   </section>
 
@@ -764,7 +764,6 @@ body{
     <p class="sub">마감된 주간의 기록입니다</p>
     <div id="arch-list"><p class="loading">기록을 찾는 중…</p></div>
     <button class="ghost gap" id="arch-back">돌아가기</button>
-    <button class="home-btn" id="arch-home">HOME</button>
   </section>
 
   <section id="s-arch-one" class="screen">
@@ -1871,7 +1870,6 @@ document.getElementById("back-who-2").onclick = () => {
 document.getElementById("go-arch-1").onclick = () => openArchives("s-who");
 document.getElementById("arch-back").onclick = () => show(archFrom);
 document.getElementById("arch-one-back").onclick = () => show("s-archs");
-document.getElementById("arch-home").onclick = () => show("s-who");
 document.getElementById("arch-one-home").onclick = () => show("s-who");
 document.getElementById("go-activity-log").onclick = () => openActivityLog(
   currentWeekKey(), "이번 주 로그 상황판", "이번 주에 쌓인 기록들을 시간 순으로 모았어요", "s-who"
