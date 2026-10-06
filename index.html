@@ -1711,6 +1711,9 @@ async function openActivityLog(weekKey, title, sub, from){
   try{
     const rows = await loadActivityLog(weekKey);
     drawActivityLog(rows);
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "instant" });
+    });
   }catch(e){
     box.innerHTML = '<p class="loading">기록을 불러오지 못했습니다</p>';
   }
