@@ -1313,9 +1313,6 @@ function badgeHTML(name){
   h += medalH;
   return h ? '<span class="badges">' + h + '</span>' : "";
 }
-function anyMedals(){
-  return NAMES.some(n => medals[n] && (medals[n].g || medals[n].s || medals[n].b));
-}
 /* 점수가 같으면 장수(total)가 많은 쪽이 상위 */
 function liveRanks(){
   const sorted = NAMES.slice().sort((a,b) => {
@@ -1377,7 +1374,6 @@ function show(id){
 function buildNames(){
   const box = document.getElementById("names");
   box.innerHTML = "";
-  const showRow = anyMedals();
   const leaderName = currentLeaderName();
   NAMES.forEach(n => {
     const isLeader = !!leaderName && (n === leaderName || n.endsWith(leaderName));
@@ -1387,7 +1383,7 @@ function buildNames(){
       (isLeader ? '<span class="name-tag">인도자</span>' : "") +
       '<span>' + n + '</span>' +
       '<span class="total">최고 <b>' + bestScore(n) + '</b>점</span>' +
-      (showRow ? (badgeHTML(n) || '<span class="badges"></span>') : "");
+      (badgeHTML(n) || '<span class="badges"></span>');
     b.onclick = () => { me = n; openChoose(); };
     box.appendChild(b);
   });
