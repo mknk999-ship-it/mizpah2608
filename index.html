@@ -627,6 +627,7 @@ body{
 
     <div class="names" id="names"></div>
     <button class="ghost gap" id="go-rank">이번주 점수랭킹</button>
+    <button class="ghost" id="go-activity-log">로그 기록</button>
     <button class="ghost" id="go-arch-1">지난 기록 보기</button>
     <button class="ghost" id="go-medal-guide">메달 방식 안내</button>
 
@@ -1853,6 +1854,9 @@ document.getElementById("go-arch-1").onclick = () => openArchives("s-who");
 document.getElementById("arch-back").onclick = () => show(archFrom);
 document.getElementById("arch-one-back").onclick = () => show("s-archs");
 document.getElementById("arch-one-home").onclick = () => show("s-who");
+document.getElementById("go-activity-log").onclick = () => openActivityLog(
+  currentWeekKey(), "이번 주 로그 기록", "이번 주에 쌓인 기록들을 시간 순으로 모았어요", "s-who"
+);
 document.getElementById("arch-one-activity").onclick = () => openActivityLog(
   curArchKey, curArchLabel + " 로그 기록", curArchLabel + "에 쌓인 기록들을 시간 순으로 모았어요", "s-arch-one"
 );
@@ -2021,7 +2025,7 @@ document.getElementById("save").onclick = async () => {
     const beforeTop3 = top3List();
 
     const weekKey = currentWeekKey();
-    logActivity(weekKey, "read", me + "님이 말씀 " + v + "장을 " + METHOD_VERB[method]);
+    logActivity(weekKey, "read", me + "님이 말씀을 " + METHOD_VERB[method]);
 
     document.getElementById("toast").innerHTML = "";
     show("s-rank");
