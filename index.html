@@ -1661,7 +1661,7 @@ function fmtLogTime(iso){
   const d = new Date(iso);
   return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
 }
-async function openActivityLog(weekKey, title, sub, from){
+async function openActivityLog(weekKey, title, sub, from, blind){
   actLogFrom = from;
   document.getElementById("activity-log-title").textContent = title;
   document.getElementById("activity-log-sub").textContent = sub;
@@ -1670,7 +1670,7 @@ async function openActivityLog(weekKey, title, sub, from){
   box.innerHTML = '<p class="loading">기록을 불러오는 중…</p>';
   try{
     const rows = await loadActivityLog(weekKey);
-    drawActivityLog(rows);
+    drawActivityLog(rows, blind);
     requestAnimationFrame(() => {
       window.scrollTo({ top: document.body.scrollHeight, behavior: "instant" });
     });
@@ -1678,7 +1678,13 @@ async function openActivityLog(weekKey, title, sub, from){
     box.innerHTML = '<p class="loading">기록을 불러오지 못했습니다</p>';
   }
 }
-function drawActivityLog(rows){
+/* 진행 중인(아직 마감 전) 주는 장수·점수를 가려서 보여준다 */
+function blindLogMessage(msg){
+  return msg
+    .replace(/말씀 \S+장을/, "말씀을")
+    .replace(/\s*\(\+[\d.]+점\)\s*$/, "");
+}
+function drawActivityLog(rows, blind){
   const box = document.getElementById("activity-log-list");
   box.innerHTML = "";
   if(!rows.length){
@@ -1700,7 +1706,7 @@ function drawActivityLog(rows){
     row.className = "log-row kind-" + r.kind;
     row.innerHTML =
       '<span class="log-time">' + fmtLogTime(r.created_at) + '</span>' +
-      '<span class="log-msg">' + r.message + '</span>';
+      '<span class="log-msg">' + (blind ? blindLogMessage(r.message) : r.message) + '</span>';
     box.appendChild(row);
   });
 }
@@ -1722,7 +1728,7 @@ function drawArchive(records){
     row.innerHTML = badge +
       '<div class="person"><div class="nm">' + p.name + '</div>' +
       (p.points === 0 ? '<div class="empty">아직 기록이 없습니다</div>' : "") +
-      '</div><div class="count blind">블라인드</div>';
+      '</div><div class="count">' + p.points + '<span class="pt">점</span></div>';
     board.appendChild(row);
   });
 }
@@ -1855,10 +1861,10 @@ document.getElementById("arch-back").onclick = () => show(archFrom);
 document.getElementById("arch-one-back").onclick = () => show("s-archs");
 document.getElementById("arch-one-home").onclick = () => show("s-who");
 document.getElementById("go-activity-log").onclick = () => openActivityLog(
-  currentWeekKey(), "이번 주 로그 기록", "이번 주에 쌓인 기록들을 시간 순으로 모았어요", "s-who"
+  currentWeekKey(), "이번 주 로그 기록", "이번 주에 쌓인 기록들을 시간 순으로 모았어요", "s-who", true
 );
 document.getElementById("arch-one-activity").onclick = () => openActivityLog(
-  curArchKey, curArchLabel + " 로그 기록", curArchLabel + "에 쌓인 기록들을 시간 순으로 모았어요", "s-arch-one"
+  curArchKey, curArchLabel + " 로그 기록", curArchLabel + "에 쌓인 기록들을 시간 순으로 모았어요", "s-arch-one", false
 );
 document.getElementById("activity-log-back").onclick = () => show(actLogFrom);
 document.getElementById("go-changelog").onclick = () => openChangelog("s-who");
@@ -1981,9 +1987,9 @@ document.getElementById("pray-save").onclick = async () => {
     const beforeTop3 = top3List();
 
     const weekKey = currentWeekKey();
-    if(items.dawn) logActivity(weekKey, "prayer", me + "님이 새벽예배를 완료했습니다");
-    if(items.min) logActivity(weekKey, "prayer", me + "님이 1분 이상 기도했습니다");
-    if(items.letter) logActivity(weekKey, "prayer", me + "님이 자필편지 기도문을 작성했습니다");
+    if(items.dawn) logActivity(weekKey, "prayer", me + "님이 새벽예배를 완료했습니다 (+" + dawnPointsFor(me) + "점)");
+    if(items.min) logActivity(weekKey, "prayer", me + "님이 1분 이상 기도했습니다 (+4점)");
+    if(items.letter) logActivity(weekKey, "prayer", me + "님이 자필편지 기도문을 작성했습니다 (+10점)");
 
     document.getElementById("toast").innerHTML = "";
     show("s-rank");
@@ -2025,7 +2031,8 @@ document.getElementById("save").onclick = async () => {
     const beforeTop3 = top3List();
 
     const weekKey = currentWeekKey();
-    logActivity(weekKey, "read", me + "님이 말씀을 " + METHOD_VERB[method]);
+    const pts = method === "eye" ? v * 1.5 : method === "hm" ? v * 2 : v;
+    logActivity(weekKey, "read", me + "님이 말씀 " + v + "장을 " + METHOD_VERB[method] + " (+" + pts + "점)");
 
     document.getElementById("toast").innerHTML = "";
     show("s-rank");
