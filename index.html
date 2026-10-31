@@ -754,6 +754,11 @@ body{
     <div id="toast"></div>
     <button class="ghost gap" id="back-who-2">돌아가기</button>
     <button class="danger" id="reset-btn">이번 주 마감하고 초기화</button>
+
+    <div class="section-divider"></div>
+    <p class="section-title">이번 주 점수 공개 설정</p>
+    <button class="ghost" id="blind-off-btn">블라인드 해제하기</button>
+    <button class="ghost" id="blind-on-btn">블라인드 켜기</button>
   </section>
 
   <section id="s-archs" class="screen">
@@ -962,6 +967,7 @@ let leaderData = null;    // {names:[...], current_idx:N}
 let wkOffset = 0;      // 마감 주차 조정 (0 = 지난주)
 let wkInfo = null;     // 현재 선택된 마감 주차
 let wkExists = false;  // 같은 주차 기록이 이미 있는지
+let blindLive = true;  // 이번 주(진행 중) 점수를 블라인드 처리할지 여부 (모두 공유)
 let curArchKey = null;   // 현재 열람 중인 지난 주 기록의 week_key
 let curArchLabel = "";   // 현재 열람 중인 지난 주 기록의 라벨
 let actLogFrom = "s-who"; // 활동 기록 화면에서 돌아갈 위치
@@ -1108,6 +1114,33 @@ async function archiveExists(key){
 }
 
 /* ── 인도자 순서 ──────────────────────────── */
+
+/* ── 이번 주 점수 블라인드 설정 (모두 공유) ─────── */
+async function loadBlindState(){
+  const r = await fetch(
+    SUPA_URL + "/rest/v1/mizpah_settings?select=blind_live&id=eq.1",
+    { headers: H, cache: "no-store" }
+  );
+  if(!r.ok) throw new Error(await r.text());
+  const rows = await r.json();
+  blindLive = rows.length ? !!rows[0].blind_live : true;
+}
+async function setBlindLive(value){
+  const toast = document.getElementById("toast");
+  try{
+    const r = await fetch(SUPA_URL + "/rest/v1/mizpah_settings?id=eq.1", {
+      method: "PATCH",
+      headers: Object.assign({}, H, { "Prefer": "return=minimal" }),
+      body: JSON.stringify({ blind_live: value, updated_at: new Date().toISOString() })
+    });
+    if(!r.ok) throw new Error(await r.text());
+    blindLive = value;
+    drawBoard();
+    if(toast) toast.innerHTML = '<div class="toast">' + (value ? "블라인드를 켰습니다" : "블라인드를 해제했습니다") + '</div>';
+  }catch(e){
+    if(toast) toast.innerHTML = '<div class="toast" style="color:#B85C3E">설정 변경에 실패했습니다</div>';
+  }
+}
 
 async function loadLeader(){
   const r = await fetch(
@@ -1544,10 +1577,14 @@ function drawBoard(animateFor, jump){
     const rise = (jump && jump.name === n && jump.delta > 0)
       ? '<span class="up">&#9650; ' + jump.delta + '</span>' : "";
 
+    const count = blindLive
+      ? '<div class="count blind">블라인드</div>'
+      : '<div class="count">' + score + '<span class="pt">점</span></div>';
+
     row.innerHTML = badge +
       '<div class="person"><div class="nm">' + n + badgeHTML(n) + rise + '</div>' +
       (score === 0 ? '<div class="empty">아직 기록이 없습니다</div>' : "") +
-      '</div><div class="count blind">블라인드</div>';
+      '</div>' + count;
     board.appendChild(row);
   });
 }
@@ -1775,6 +1812,10 @@ async function verifyPin(){
       await confirmLeaderShuffle();
       return;
     }
+    if(purpose === "blind-on" || purpose === "blind-off"){
+      await setBlindLive(purpose === "blind-on");
+      return;
+    }
     okPin = wasPin;
     wkOffset = 0;
     await refreshWeekPick();
@@ -1847,6 +1888,7 @@ document.getElementById("go-rank").onclick = async () => {
   show("s-rank");
   document.getElementById("toast").innerHTML = "";
   document.getElementById("board").innerHTML = '<p class="loading">점수를 세는 중…</p>';
+  try{ await loadBlindState(); }catch(e){}
   try{ await load(); }
   catch(e){ note("기록을 불러오지 못했습니다 · 연결을 확인해 주세요"); }
   drawBoard();
@@ -1861,7 +1903,7 @@ document.getElementById("arch-back").onclick = () => show(archFrom);
 document.getElementById("arch-one-back").onclick = () => show("s-archs");
 document.getElementById("arch-one-home").onclick = () => show("s-who");
 document.getElementById("go-activity-log").onclick = () => openActivityLog(
-  currentWeekKey(), "이번 주 로그 기록", "이번 주에 쌓인 기록들을 시간 순으로 모았어요", "s-who", true
+  currentWeekKey(), "이번 주 로그 기록", "이번 주에 쌓인 기록들을 시간 순으로 모았어요", "s-who", blindLive
 );
 document.getElementById("arch-one-activity").onclick = () => openActivityLog(
   curArchKey, curArchLabel + " 로그 기록", curArchLabel + "에 쌓인 기록들을 시간 순으로 모았어요", "s-arch-one", false
@@ -1914,6 +1956,8 @@ document.getElementById("menu-changelog").onclick = () => {
 };
 
 document.getElementById("reset-btn").onclick = () => openPin("reset");
+document.getElementById("blind-off-btn").onclick = () => openPin("blind-off");
+document.getElementById("blind-on-btn").onclick = () => openPin("blind-on");
 document.getElementById("ok-cancel").onclick = () => {
   okPin = "";
   document.getElementById("veil-ok").classList.remove("on");
@@ -2075,6 +2119,7 @@ async function undo(){
   buildNames();
   buildPad();
   setAmount(0);
+  try{ await loadBlindState(); }catch(e){}
   try{ await loadArchives(); }catch(e){}
   try{ await load(); }
   catch(e){ note("기록을 불러오지 못했습니다 · 연결을 확인해 주세요"); }
