@@ -773,11 +773,6 @@ body{
     <div id="toast"></div>
     <button class="ghost gap" id="back-who-2">돌아가기</button>
     <button class="danger" id="reset-btn">이번 주 마감하고 초기화</button>
-
-    <div class="section-divider"></div>
-    <p class="section-title">이번 주 점수 공개 설정</p>
-    <button class="ghost" id="blind-off-btn">블라인드 해제하기</button>
-    <button class="ghost" id="blind-on-btn">블라인드 켜기</button>
   </section>
 
   <section id="s-archs" class="screen">
@@ -2001,8 +1996,6 @@ document.getElementById("menu-changelog").onclick = () => {
 };
 
 document.getElementById("reset-btn").onclick = () => openPin("reset");
-document.getElementById("blind-off-btn").onclick = () => openPin("blind-off");
-document.getElementById("blind-on-btn").onclick = () => openPin("blind-on");
 document.getElementById("ok-cancel").onclick = () => {
   okPin = "";
   document.getElementById("veil-ok").classList.remove("on");
