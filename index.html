@@ -1042,6 +1042,9 @@ function weekInfo(d){
     range: (sun.getMonth()+1) + "/" + sun.getDate() + " ~ " + (sat.getMonth()+1) + "/" + sat.getDate()
   };
 }
+/* 이 주차부터 금은동메달이 등수제가 아닌 점수 기준제로 바뀜 (그 이전 지난 기록은 등수제 그대로 유지) */
+const SCORE_MEDAL_FROM_WEEK = "2026-11-W1";
+
 /* 마감 대상 주차: 기본은 "지난주"(오늘 - 7일), wkOffset로 조정 */
 function closingWeek(){
   const d = new Date();
@@ -1324,17 +1327,25 @@ function medalTier(pts){
   if(pts >= 100) return "b";
   return null;
 }
-function medalLine(records){
-  const groups = { g: [], s: [], b: [] };
-  (records || []).forEach(p => {
-    const tier = medalTier(pointsOf(p));
-    if(tier) groups[tier].push(p.name);
-  });
+function medalLine(records, weekKey){
+  const useScore = weekKey >= SCORE_MEDAL_FROM_WEEK;
+  const groups = useScore ? { g: [], s: [], b: [] } : { 1: [], 2: [], 3: [] };
+  if(useScore){
+    (records || []).forEach(p => {
+      const tier = medalTier(pointsOf(p));
+      if(tier) groups[tier].push(p.name);
+    });
+  }else{
+    rankList(records).forEach(p => {
+      if(p.points > 0 && groups[p.rank]) groups[p.rank].push(p.name);
+    });
+  }
+  const tiers = useScore ? [["g","b1"],["s","b2"],["b","b3"]] : [[1,"b1"],[2,"b2"],[3,"b3"]];
   const segs = [];
-  [["g","b1"],["s","b2"],["b","b3"]].forEach(([tier,cls]) => {
-    if(groups[tier].length){
+  tiers.forEach(([key,cls]) => {
+    if(groups[key].length){
       segs.push('<span style="margin-right:10px"><i class="bdg ' + cls +
-        '" style="margin-right:6px"></i>' + groups[tier].join(" · ") + '</span>');
+        '" style="margin-right:6px"></i>' + groups[key].join(" · ") + '</span>');
     }
   });
   return segs.join("");
@@ -1342,11 +1353,18 @@ function medalLine(records){
 function tallyMedals(){
   const t = {};
   NAMES.forEach(n => t[n] = {g:0, s:0, b:0});
+  const keys = ["g","s","b"];
   archives.forEach(a => {
-    (a.records || []).forEach(p => {
-      const tier = medalTier(pointsOf(p));
-      if(tier && t[p.name]) t[p.name][tier]++;
-    });
+    if(a.week_key >= SCORE_MEDAL_FROM_WEEK){
+      (a.records || []).forEach(p => {
+        const tier = medalTier(pointsOf(p));
+        if(tier && t[p.name]) t[p.name][tier]++;
+      });
+    }else{
+      rankList(a.records).forEach(p => {
+        if(p.points > 0 && p.rank <= 3 && t[p.name]) t[p.name][keys[p.rank - 1]]++;
+      });
+    }
   });
   medals = t;
 }
@@ -1691,7 +1709,7 @@ async function openArchives(from){
     byYear[y]
       .sort((a,b) => (a.week_key < b.week_key ? 1 : -1))
       .forEach(a => {
-        const line = medalLine(a.records);
+        const line = medalLine(a.records, a.week_key);
         const b = document.createElement("button");
         b.className = "weeklink";
         b.innerHTML = "<span>" + a.month + "월 " + a.week + "주</span><small>" +
@@ -1709,7 +1727,7 @@ function openArchive(key){
   curArchKey = a.week_key;
   curArchLabel = a.month + "월 " + a.week + "주";
   document.getElementById("arch-title").textContent = a.month + "월 " + a.week + "주 기록";
-  const line = medalLine(a.records);
+  const line = medalLine(a.records, a.week_key);
   document.getElementById("arch-sub").innerHTML =
     line || "이 주에는 쌓인 돌이 없습니다";
   drawArchive(a.records || []);
