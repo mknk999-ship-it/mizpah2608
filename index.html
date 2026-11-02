@@ -416,6 +416,17 @@ body{
 .dia-badge{display:inline-flex;align-items:center;gap:3px}
 .dia-badge b{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ink)}
 
+.medal-criteria{
+  background:var(--paper-2);border:1px solid rgba(46,40,34,.1);border-radius:14px;
+  padding:20px 16px;margin-bottom:22px;text-align:center;
+}
+.mc-title{font-family:var(--display);font-size:16px;color:var(--ink);margin:0 0 16px;letter-spacing:.02em}
+.mc-row{display:flex;justify-content:center;gap:22px;margin-bottom:12px}
+.mc-item{display:flex;flex-direction:column;align-items:center;gap:8px}
+.mc-item i.bdg{transform:scale(1.7)}
+.mc-item span{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ink);letter-spacing:.02em}
+.mc-note{font-size:11px;color:var(--ink-dim);letter-spacing:.02em;margin:0}
+
 .person{min-width:0}
 .person .nm{font-family:var(--display);font-size:17px;margin-bottom:7px}
 .empty{font-size:11.5px;color:var(--ink-dim);letter-spacing:.05em}
@@ -749,7 +760,15 @@ body{
   </section>
 
   <section id="s-rank" class="screen">
-    <p class="ask" style="font-size:19px;margin-bottom:22px">이번주 말씀과 기도 점수</p>
+    <div class="medal-criteria">
+      <p class="mc-title">금 · 은 · 동메달 획득 기준</p>
+      <div class="mc-row">
+        <div class="mc-item"><i class="bdg b1"></i><span>200점 이상</span></div>
+        <div class="mc-item"><i class="bdg b2"></i><span>150점 이상</span></div>
+        <div class="mc-item"><i class="bdg b3"></i><span>100점 이상</span></div>
+      </div>
+      <p class="mc-note">등수와 상관없이 기준을 넘긴 모든 분께 수여돼요</p>
+    </div>
     <div id="board"><p class="loading">점수를 세는 중…</p></div>
     <div id="toast"></div>
     <button class="ghost gap" id="back-who-2">돌아가기</button>
@@ -858,11 +877,11 @@ body{
     <div class="mg-cards">
       <div class="mg-card">
         <div class="mg-row">
-          <div class="mg-slot"><i class="bdg b1"></i><span class="mg-tag">1등</span></div>
-          <div class="mg-slot"><i class="bdg b2"></i><span class="mg-tag">2등</span></div>
-          <div class="mg-slot"><i class="bdg b3"></i><span class="mg-tag">3등</span></div>
+          <div class="mg-slot"><i class="bdg b1"></i><span class="mg-tag">200점 이상</span></div>
+          <div class="mg-slot"><i class="bdg b2"></i><span class="mg-tag">150점 이상</span></div>
+          <div class="mg-slot"><i class="bdg b3"></i><span class="mg-tag">100점 이상</span></div>
         </div>
-        <p class="mg-desc">매주 마감할 때 1 · 2 · 3등에게<br>금 · 은 · 동메달이 하나씩 주어집니다</p>
+        <p class="mg-desc">매주 마감할 때 점수 기준을 넘긴 모든 분께<br>등수와 상관없이 금 · 은 · 동메달이 주어집니다</p>
       </div>
 
       <div class="mg-card">
@@ -1298,16 +1317,24 @@ function rankList(records){
     return { name: p.name, total: tot, points: pts, rank: rank };
   });
 }
+/* 금 200점↑ · 은 150점↑ · 동 100점↑ (등수와 무관, 기준을 넘긴 사람 모두 수여) */
+function medalTier(pts){
+  if(pts >= 200) return "g";
+  if(pts >= 150) return "s";
+  if(pts >= 100) return "b";
+  return null;
+}
 function medalLine(records){
-  const groups = {1:[],2:[],3:[]};
-  rankList(records).forEach(p => {
-    if(p.points > 0 && groups[p.rank]) groups[p.rank].push(p.name);
+  const groups = { g: [], s: [], b: [] };
+  (records || []).forEach(p => {
+    const tier = medalTier(pointsOf(p));
+    if(tier) groups[tier].push(p.name);
   });
   const segs = [];
-  [[1,"b1"],[2,"b2"],[3,"b3"]].forEach(([rank,cls]) => {
-    if(groups[rank].length){
+  [["g","b1"],["s","b2"],["b","b3"]].forEach(([tier,cls]) => {
+    if(groups[tier].length){
       segs.push('<span style="margin-right:10px"><i class="bdg ' + cls +
-        '" style="margin-right:6px"></i>' + groups[rank].join(" · ") + '</span>');
+        '" style="margin-right:6px"></i>' + groups[tier].join(" · ") + '</span>');
     }
   });
   return segs.join("");
@@ -1315,10 +1342,10 @@ function medalLine(records){
 function tallyMedals(){
   const t = {};
   NAMES.forEach(n => t[n] = {g:0, s:0, b:0});
-  const keys = ["g","s","b"];
   archives.forEach(a => {
-    rankList(a.records).forEach(p => {
-      if(p.points > 0 && p.rank <= 3 && t[p.name]) t[p.name][keys[p.rank - 1]]++;
+    (a.records || []).forEach(p => {
+      const tier = medalTier(pointsOf(p));
+      if(tier && t[p.name]) t[p.name][tier]++;
     });
   });
   medals = t;
