@@ -1605,13 +1605,15 @@ function drawBoard(animateFor, jump){
   order.forEach(n => {
     const score = scoreOf(n);
     const rk = ranks[n];
-    const isTop = rk <= 3 && score > 0;
+    const tier = medalTier(score);
+    const isTop = !!tier;
     const row = document.createElement("div");
     row.className = "row" + (isTop ? " top" : "") + (n === me ? " me" : "");
     row.dataset.name = n;
 
+    const tierM = tier === "g" ? 1 : tier === "s" ? 2 : 3;
     const badge = isTop
-      ? '<div class="medal m' + rk + '">' + rk + '</div>'
+      ? '<div class="medal m' + tierM + '">' + rk + '</div>'
       : '<div class="rank-n">' + rk + '</div>';
 
     const rise = (jump && jump.name === n && jump.delta > 0)
